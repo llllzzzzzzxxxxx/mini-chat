@@ -172,7 +172,7 @@ body {
 }
 
 .shell {
-    position: relative;
+    // position: relative;
     width: 1000px;
     min-width: 1000px;
     min-height: 600px;
@@ -324,11 +324,13 @@ body {
 
 .a-container {
     z-index: 100;
-    left: calc(100% - 600px);
+    margin-left: 400px;
+    right: 0;
+    left: auto;
 }
 
 .b-container {
-    left: calc(100% - 600px);
+    left: 0;
     z-index: 0;
 }
 
