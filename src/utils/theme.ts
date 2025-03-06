@@ -1,4 +1,4 @@
-import { useThemeStore } from '@/stores/useThemeStore.js'
+import { useThemeStore } from '@/stores/module/useThemeStore.js'
 import { nextTick } from 'vue'
 
 type Theme = 'light' | 'dark'

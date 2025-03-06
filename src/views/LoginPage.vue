@@ -4,10 +4,18 @@
             <div class="container a-container" :class="{ 'is-txl': !isLogin }">
                 <form class="form" id="a-form">
                     <h2 class="form_title title">创建账号</h2>
-                    <span class="form_span">选择注册方式活电子邮箱注册</span>
-                    <input type="text" class="form_input" placeholder="Name">
-                    <input type="text" class="form_input" placeholder="Email">
-                    <input type="text" class="form_input" placeholder="Password">
+                    <input type="text" class="form_input" v-model="registerForm.userName" placeholder="Name">
+                    <input type="text" class="form_input" v-model="registerForm.email" placeholder="Email">
+                    <div class="verify-code">
+                        <input type="text" class="form_input" v-model="registerForm.emailCode" placeholder="验证码">
+                        <button type="button" class="form_button button send-code-btn" :disabled="countdown > 0"
+                            @click="sendVerifyCode">
+                            {{ countdown > 0 ? `${countdown}s` : '获取验证码' }}
+                        </button>
+                    </div>
+                    <input type="password" class="form_input" v-model="registerForm.password" placeholder="Password">
+                    <input type="password" class="form_input" v-model="registerForm.confirmPassword"
+                        placeholder="Confirm Password">
                     <button class="form_button button submit">SIGN UP</button>
                 </form>
             </div>
@@ -15,9 +23,8 @@
             <div class="container b-container" :class="{ 'is-txl': isLogin, 'is-z': isLogin }">
                 <form class="form" id="b-form">
                     <h2 class="form_title title">登入账号</h2>
-                    <span class="form_span">选择登录方式或电子邮箱登录</span>
-                    <input type="text" class="form_input" placeholder="Email">
-                    <input type="text" class="form_input" placeholder="Password">
+                    <input type="text" class="form_input" v-model="loginForm.userName" placeholder="Username">
+                    <input type="text" class="form_input" v-model="loginForm.password" placeholder="Password">
                     <a class="form_link">忘记密码？</a>
                     <button class="form_button button submit">SIGN IN</button>
                 </form>
@@ -45,23 +52,26 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { login, register, getCode } from '@/api/login'
+import { ElMessage } from 'element-plus'
+import type { LoginResponse, RegisterResponese, CodeResponese, UserInfo } from '@/types/login'
+import { useUserStore } from '@/stores/module/useUserStore'
 
 const router = useRouter()
 const isLogin = ref(true)
 const isAnimating = ref(false)
 const countdown = ref(0)
-const backgroundImage = ref('')
 
 // 表单数据
 const loginForm = ref({
-    username: '',
+    userName: '',
     password: ''
 })
 
 const registerForm = ref({
-    username: '',
+    userName: '',
     email: '',
-    verifyCode: '',
+    emailCode: '',
     password: '',
     confirmPassword: ''
 })
@@ -76,63 +86,125 @@ const handleSwitch = () => {
 }
 
 // 处理登录
-const handleLogin = () => {
-    // TODO: 实现登录逻辑
-    console.log('登录:', loginForm.value)
-    router.push('/')
+const handleLogin = async () => {
+    if (!loginForm.value.userName || !loginForm.value.password) {
+        ElMessage.error('请输入用户名和密码')
+        return
+    }
+
+    try {
+        const res = await login(loginForm.value) as LoginResponse
+        if (res.code === 0) {
+            // 存储token
+            localStorage.setItem('x-token', res.data.token)
+            useUserStore().setUser(res.data as UserInfo)
+            localStorage.setItem('user', JSON.stringify(res.data))
+            ElMessage.success('登录成功')
+            router.push('/')
+        } else {
+            ElMessage.error(res.msg || '登录失败')
+        }
+    } catch (error: any) {
+        ElMessage.error(error.message || '登录失败，请稍后重试')
+    }
 }
 
 // 处理注册
-const handleRegister = () => {
-    // TODO: 实现注册逻辑
-    console.log('注册:', registerForm.value)
-}
-
-// 发送验证码
-const sendVerifyCode = async () => {
-    if (!registerForm.value.email) {
-        alert('请输入邮箱')
+const handleRegister = async () => {
+    // 表单验证
+    if (!registerForm.value.userName || !registerForm.value.email ||
+        !registerForm.value.password || !registerForm.value.confirmPassword ||
+        !registerForm.value.emailCode) {
+        ElMessage.error('请填写所有必填项')
         return
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(registerForm.value.email)) {
-        alert('请输入正确的邮箱格式')
+        ElMessage.error('请输入正确的邮箱格式')
+        return
+    }
+
+    // 验证密码
+    if (registerForm.value.password !== registerForm.value.confirmPassword) {
+        ElMessage.error('两次输入的密码不一致')
         return
     }
 
     try {
-        // TODO: 调用发送验证码的API
-        console.log('发送验证码到:', registerForm.value.email)
+        const res = await register({
+            userName: registerForm.value.userName,
+            email: registerForm.value.email,
+            password: registerForm.value.password,
+            emailCode: registerForm.value.emailCode
+        }) as RegisterResponese
 
-        // 开始倒计时
-        countdown.value = 60
-        const timer = setInterval(() => {
-            countdown.value--
-            if (countdown.value <= 0) {
-                clearInterval(timer)
+        if (res.code === 0) {
+            ElMessage.success('注册成功')
+            // 清空表单
+            registerForm.value = {
+                userName: '',
+                email: '',
+                emailCode: '',
+                password: '',
+                confirmPassword: ''
             }
-        }, 1000)
-    } catch (error) {
-        console.error('发送验证码失败:', error)
-        alert('发送验证码失败，请重试')
+            // 切换到登录页面
+            isLogin.value = true
+        } else {
+            ElMessage.error(res.msg || '注册失败')
+        }
+    } catch (error: any) {
+        ElMessage.error(error.message || '注册失败，请稍后重试')
     }
 }
 
-// 随机获取背景图
-const getRandomBackground = () => {
-    const randomNum = Math.floor(Math.random() * 7) + 1
-    return new URL(`../assets/LoginImg/${randomNum}.jpg`, import.meta.url).href
+// 发送验证码
+const sendVerifyCode = async () => {
+    if (!registerForm.value.email) {
+        ElMessage.error('请输入邮箱')
+        return
+    }
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(registerForm.value.email)) {
+        ElMessage.error('请输入正确的邮箱格式')
+        return
+    }
+
+    try {
+        const res = await getCode({ email: registerForm.value.email }) as CodeResponese
+        if (res.code === 0) {
+            ElMessage.success('验证码已发送')
+            // 开始倒计时
+            countdown.value = 60
+            const timer = setInterval(() => {
+                countdown.value--
+                if (countdown.value <= 0) {
+                    clearInterval(timer)
+                }
+            }, 1000)
+        } else {
+            ElMessage.error(res.msg || '发送验证码失败')
+        }
+    } catch (error: any) {
+        ElMessage.error(error.message || '发送验证码失败，请重试')
+    }
 }
 
 onMounted(() => {
-    backgroundImage.value = getRandomBackground()
-
     // 添加按钮点击事件
     const allButtons = document.querySelectorAll('.submit')
     allButtons.forEach(button => {
-        button.addEventListener('click', (e) => e.preventDefault())
+        button.addEventListener('click', (e) => {
+            e.preventDefault()
+            if (isLogin.value) {
+                handleLogin()
+            } else {
+                handleRegister()
+            }
+        })
     })
 
     const switchBtn = document.querySelectorAll('.switch-btn')
@@ -156,7 +228,7 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: linear-gradient(90deg, #e0c3fc, #8ec5fc 100%);
+    // background-image: linear-gradient(90deg, #e0c3fc, #8ec5fc 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

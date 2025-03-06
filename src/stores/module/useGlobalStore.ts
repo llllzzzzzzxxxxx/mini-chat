@@ -7,7 +7,7 @@ export const useGlobalStore = defineStore('global', {
     dialogContent: '',
   }),
   actions: {
-    setGlobalDialog(isOpen, title, content) {
+    setGlobalDialog(isOpen: boolean, title: string, content: string) {
       this.isOpenGlobalDialog = isOpen
       this.dialogTitle = title
       this.dialogContent = content

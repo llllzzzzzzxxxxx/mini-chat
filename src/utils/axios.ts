@@ -1,5 +1,5 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse, AxiosHeaders } from 'axios';
-import { useGlobalStore } from '@/stores/useGlobalStore.js';
+import { useGlobalStore } from '@/stores/module/useGlobalStore.js';
 
 const SERVICE_URL = import.meta.env.VITE_HTTP_URL;
 export { SERVICE_URL };
