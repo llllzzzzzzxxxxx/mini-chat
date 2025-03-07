@@ -17,14 +17,14 @@ export interface CodeResponese {
 }
 export interface RegisterResponese {
     code: number;
-    data: string|null;
+    data: string | null;
     msg: string;
 }
 export interface UserInfo {
     userId: number
     userName: string
-    type: string
     email: string
     avatar: string | null
+    type: string
 }
 

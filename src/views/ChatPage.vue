@@ -38,8 +38,12 @@
             </div>
         </div>
         <div class="main">
-            <div class="main-left"></div>
-            <div class="main-center"></div>
+            <div class="main-left">
+                <ChatList></ChatList>
+            </div>
+            <div class="main-center">
+                <Message></Message>
+            </div>
             <div class="main-right"></div>
         </div>
 
@@ -56,7 +60,8 @@ import { logout } from '@/api/login'
 import { ElMessage } from 'element-plus'
 import type { ApiResponse } from '@/types/common'
 import UserInfo from '@/components/UserInfo.vue'
-
+import ChatList from '@/components/ChatList.vue'
+import Message from '@/components/Message.vue'
 const router = useRouter()
 const userStore = useUserStore()
 const showUserInfo = ref(false)
@@ -65,18 +70,15 @@ const showUserInfo = ref(false)
 const handleLogout = async () => {
     try {
         const res = await logout() as ApiResponse
-        if (res.code === 0) {
-            // 清除用户信息
-            userStore.clearUser()
-            // 清除token
-            localStorage.removeItem('x-token')
-            localStorage.removeItem('user')
-            ElMessage.success('退出成功')
-            // 跳转到登录页
-            router.push('/login')
-        } else {
-            ElMessage.error(res.msg || '退出失败')
-        }
+        // 清除用户信息
+        userStore.clearUser()
+        // 清除token
+        localStorage.removeItem('x-token')
+        localStorage.removeItem('user')
+        ElMessage.success('退出成功')
+        // 跳转到登录页
+        router.push('/login')
+
     } catch (error: any) {
         ElMessage.error(error.message || '退出失败，请稍后重试')
     }

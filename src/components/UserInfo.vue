@@ -142,6 +142,7 @@ const handleSave = async () => {
 }
 
 .dialog-footer {
+    color: black;
     display: flex;
     justify-content: flex-end;
     gap: 10px;

@@ -4,7 +4,6 @@
             <div class="page">
                 <router-view />
             </div>
-            
         </div>
     </div>
 </template>
@@ -24,7 +23,7 @@ import { useRouter } from 'vue-router'
   align-items: center;
   background: linear-gradient(135deg, #d9eaff, #b5d3f3);
   overflow: hidden;
-
+    color: black;
   .shape-container {
     position: relative;
     width: 100%;
