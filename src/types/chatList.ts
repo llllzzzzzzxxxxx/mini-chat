@@ -51,7 +51,7 @@ export interface CreateChatParams {
 
 // 标记已读参数
 export interface ReadMessageParams {
-    chatId: string
+    targetId: string
 }
 
 // 删除聊天参数

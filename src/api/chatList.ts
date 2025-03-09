@@ -8,7 +8,7 @@ export const group = () => Http.get<ChatListResponse>('/api/v1/chat-list/group')
 export const privateList = () => Http.get<ChatListResponse>('/api/v1/chat-list/list/private')
 
 // 创建聊天
-export const create = (param: CreateChatParams) => Http.post<ChatListResponse>('/api/v1/chat-list/create', param)
+export const create = (param: {targetId: string}) => Http.post<ChatListResponse>('/api/v1/chat-list/create', param)
 
 // 标记已读
 export const read = (param: ReadMessageParams) => Http.post<ChatListResponse>('/api/v1/chat-list/read', param)

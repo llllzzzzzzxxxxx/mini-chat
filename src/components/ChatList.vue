@@ -3,9 +3,11 @@
         <!-- 群聊部分 -->
         <div class="chat-section">
             <div class="section-title">群聊</div>
-            <div v-for="chat in groupChats" :key="chat.id" class="chat-item" @click="handleChatClick(chat)">
+            <div v-for="chat in chatListStore.groupChats" :key="chat.id" class="chat-item"
+                :class="{ active: messageStore.targetId === chat.targetId }" @click="handleChatClick(chat)">
                 <div class="chat-avatar">
-                    <Avatar :name="chat.targetInfo.name" :size="40" />
+                    <img v-if="chat.targetInfo.avatar" :src="chat.targetInfo.avatar" alt="">
+                    <Avatar v-else :name="chat.targetInfo.name" :size="40" />
                     <div v-if="chat.unreadCount > 0" class="unread-badge">
                         {{ chat.unreadCount > 99 ? '99+' : chat.unreadCount }}
                     </div>
@@ -15,8 +17,11 @@
                         <span class="chat-name">{{ chat.targetInfo.name }}</span>
                         <span class="chat-time">{{ formatTime(chat.updateTime) }}</span>
                     </div>
-                    <div class="chat-message">
-                        {{ chat.lastMessage?.message || '暂无消息' }}
+                    <div v-if="chat.lastMessage.type === 'emoji'" class="chat-message">
+                        [emoji]
+                    </div>
+                    <div v-else class="chat-message" :title="getLatestMessage(chat.targetId)">
+                        {{ getLatestMessage(chat.targetId) }}
                     </div>
                 </div>
             </div>
@@ -25,9 +30,11 @@
         <!-- 私聊部分 -->
         <div class="chat-section">
             <div class="section-title">私聊</div>
-            <div v-for="chat in privateChats" :key="chat.id" class="chat-item" @click="handleChatClick(chat)">
+            <div v-for="chat in chatListStore.privateChats" :key="chat.id" class="chat-item"
+                :class="{ active: messageStore.targetId === chat.targetId }" @click="handleChatClick(chat)">
                 <div class="chat-avatar">
-                    <Avatar :name="chat.targetInfo.name" :size="40" />
+                    <img v-if="chat.targetInfo.avatar" :src="chat.targetInfo.avatar" alt="">
+                    <Avatar v-else :name="chat.targetInfo.name" :size="40" />
                     <div v-if="chat.unreadCount > 0" class="unread-badge">
                         {{ chat.unreadCount > 99 ? '99+' : chat.unreadCount }}
                     </div>
@@ -37,84 +44,141 @@
                         <span class="chat-name">{{ chat.targetInfo.name }}</span>
                         <span class="chat-time">{{ formatTime(chat.updateTime) }}</span>
                     </div>
-                    <div class="chat-message">
-                        {{ chat.lastMessage?.message || '暂无消息' }}
+                    <div v-if="chat.lastMessage.type === 'emoji'" class="chat-message">
+                        [emoji]
+                    </div>
+                    <div v-else class="chat-message" :title="getLatestMessage(chat.targetId)">
+                        {{ getLatestMessage(chat.targetId) }}
                     </div>
                 </div>
             </div>
         </div>
 
-        <div v-if="chatList.length === 0" class="empty-list">
+        <div v-if="chatListStore.chatList.length === 0" class="empty-list">
             <el-empty description="暂无聊天消息" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { group, privateList } from '@/api/chatList'
 import type { ChatListItem } from '@/types/chatList'
+import type { MessageInfo } from '@/types/chatList'
 import { ElMessage } from 'element-plus'
 import { formatTime } from '@/utils/date'
 import Avatar from '@/components/Avatar.vue'
 import { useMessageStore } from '@/stores/module/useMessageStore'
+import { useChatListStore } from '@/stores/module/usechatListStore'
+import EventBus from '@/utils/eventBus'
+import { useUserStore } from '@/stores/module/useUserStore'
 
-const chatList = ref<ChatListItem[]>([])
+const chatListStore = useChatListStore()
 const messageStore = useMessageStore()
+const userStore = useUserStore()
 
-// 计算群聊和私聊列表
-const groupChats = computed(() =>
-    chatList.value.filter(chat => chat.type === 'group')
-        .sort((a, b) => new Date(b.updateTime).getTime() - new Date(a.updateTime).getTime())
-)
+// 处理新消息更新聊天列表
+const handleNewMessage = (content: any) => {
+    let targetChat = null;
 
-const privateChats = computed(() =>
-    chatList.value.filter(chat => chat.type === 'private')
-        .sort((a, b) => new Date(b.updateTime).getTime() - new Date(a.updateTime).getTime())
-)
+    // 根据消息类型和发送对象找到对应的聊天
+    if (content.source === 'group') {
+        // 群聊消息，根据toId（群ID）查找
+        targetChat = chatListStore.chatList.find(chat =>
+            chat.type === 'group' && chat.targetId === content.toId
+        );
+    } else {
+        // 私聊消息，需要根据发送者和接收者判断
+        const currentUserId = userStore.user?.userId.toString();
 
-// 获取所有聊天列表
-const fetchAllChats = async () => {
-    try {
-        // 获取群聊列表
-        const groupRes = await group()
-        // 获取私聊列表
-        const privateRes = await privateList()
-
-        if (groupRes.code === 0 && privateRes.code === 0) {
-            const groupChats = Array.isArray(groupRes.data) ? groupRes.data : [groupRes.data]
-            const privateChats = Array.isArray(privateRes.data) ? privateRes.data : [privateRes.data]
-            console.log('群聊数据:', groupChats)
-            console.log('私聊数据:', privateChats)
-            // 合并两个列表
-            chatList.value = [...groupChats, ...privateChats]
-
-            // 如果有群聊，自动设置第一个群聊的targetId
-            if (groupChats.length > 0) {
-                messageStore.setTargetId(groupChats[0].targetId)
-            }
-        } else {
-            ElMessage.error('获取聊天列表失败')
+        // 如果我是发送者
+        if (content.fromId === currentUserId) {
+            targetChat = chatListStore.chatList.find(chat =>
+                chat.type === 'user' && chat.targetId === content.toId
+            );
         }
-    } catch (error: any) {
-        ElMessage.error(error.message || '获取聊天列表失败')
+        // 如果我是接收者
+        else if (content.toId === currentUserId) {
+            targetChat = chatListStore.chatList.find(chat =>
+                chat.type === 'user' && chat.targetId === content.fromId
+            );
+        }
+
+        // 如果没有找到对应的聊天，可能需要创建新的聊天
+        if (!targetChat && content.toId === currentUserId) {
+            // 当收到新的私聊消息但没有对应的聊天时，刷新聊天列表
+            chatListStore.fetchAllChats();
+            return;
+        }
+    }
+
+    // 如果找到对应的聊天
+    if (targetChat) {
+        // 如果不是当前聊天，增加未读消息数
+        if (targetChat.targetId !== messageStore.targetId) {
+            targetChat.unreadCount = (targetChat.unreadCount || 0) + 1;
+        }
+
+        // 更新最后一条消息
+        targetChat.lastMessage = {
+            id: content.id,
+            fromId: content.fromId,
+            toId: content.toId,
+            fromInfo: content.fromInfo,
+            message: content.message,
+            referenceMsg: content.referenceMsg,
+            atUser: content.atUser,
+            isShowTime: false,
+            type: content.type,
+            source: content.source,
+            createTime: content.createTime,
+            updateTime: content.updateTime
+        } as MessageInfo;
+        targetChat.updateTime = content.createTime;
+
+        // 重新排序聊天列表
+        chatListStore.chatList.sort((a, b) =>
+            new Date(b.updateTime).getTime() - new Date(a.updateTime).getTime()
+        );
     }
 }
 
 // 点击聊天项
 const handleChatClick = (chat: ChatListItem) => {
-    console.log('点击的聊天targetId:', chat.targetId)
     messageStore.setTargetId(chat.targetId)
-    console.log('设置后的store targetId:', messageStore.targetId)
+    messageStore.setChatName(chat.targetInfo.name)
+    messageStore.source = chat.type
+    chatListStore.readChat(chat.targetId)
 }
 
-// 定义事件
-// const emit = defineEmits<{
-//     (e: 'select-chat', chat: ChatListItem): void
-// }>()
+// 获取最新消息内容
+const getLatestMessage = (targetId: string): string => {
+    const chat = chatListStore.chatList.find(item => item.targetId === targetId)
+    if (!chat?.lastMessage.message) return '暂无消息'
+
+    try {
+        if (typeof chat.lastMessage.message === 'string') {
+            const messageObj = JSON.parse(chat.lastMessage.message)
+            if (Array.isArray(messageObj)) {
+                return messageObj.map(item => item.content || '').join('')
+            }
+            return chat.lastMessage.message
+        }
+        return JSON.stringify(chat.lastMessage)
+    } catch {
+        return chat.lastMessage.toString()
+    }
+}
 
 onMounted(() => {
-    fetchAllChats()
+    chatListStore.fetchAllChats()
+    // 监听新消息
+    EventBus.on('on-receive-msg', handleNewMessage)
+})
+
+onBeforeUnmount(() => {
+    // 移除事件监听
+    EventBus.off('on-receive-msg', handleNewMessage)
 })
 </script>
 
@@ -143,20 +207,45 @@ onMounted(() => {
         }
     }
 
+    .active {
+        background-color: #0090F0;
+    }
+
     .chat-item {
         display: flex;
         align-items: center;
-        padding: 10px 15px;
+        padding: 12px;
         cursor: pointer;
         transition: background-color 0.3s;
+        border-bottom: 1px solid #f0f0f0;
 
-        &:hover {
-            background-color: #f5f7fa;
+        &:hover:not(.active) {
+            background-color: #f5f5f5;
+        }
+
+        &.active {
+            border-radius: 8px;
+
+            .chat-name {
+                color: #fff !important;
+            }
+
+            .chat-time {
+                color: #fff !important;
+            }
+
+            .chat-message {
+                color: #fff !important;
+            }
         }
 
         .chat-avatar {
             position: relative;
             margin-right: 12px;
+
+            img {
+                width: 40px;
+            }
 
             .unread-badge {
                 position: absolute;
@@ -176,7 +265,7 @@ onMounted(() => {
 
         .chat-info {
             flex: 1;
-            overflow: hidden;
+            min-width: 100px;
 
             .chat-header {
                 display: flex;
@@ -185,27 +274,43 @@ onMounted(() => {
                 margin-bottom: 4px;
 
                 .chat-name {
-                    font-size: 16px;
                     font-weight: 500;
-                    color: #303133;
-                    overflow: hidden;
+                    font-size: 14px;
+                    color: #333;
                     text-overflow: ellipsis;
+                    overflow: hidden;
                     white-space: nowrap;
                 }
 
                 .chat-time {
                     font-size: 12px;
-                    color: #909399;
+                    color: #999;
                 }
             }
 
             .chat-message {
-                font-size: 14px;
-                color: #606266;
+                font-size: 13px;
+                width: 150px;
+                color: #666;
+                padding-top: 5px;
+                white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                white-space: nowrap;
             }
+        }
+
+        .chat-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            background-color: #ff4d4f;
+            border-radius: 9px;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
         }
     }
 

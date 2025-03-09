@@ -1,6 +1,7 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse, AxiosHeaders } from 'axios';
 import { useGlobalStore } from '@/stores/module/useGlobalStore.js';
-
+import router from '@/router';
+import { ElMessage } from 'element-plus';
 const SERVICE_URL = import.meta.env.VITE_HTTP_URL;
 export { SERVICE_URL };
 
@@ -17,9 +18,15 @@ axios.interceptors.response.use(
     const globalStore = useGlobalStore();
     if (response.data.code === 401) {
       globalStore.setGlobalDialog(true, '认证失效', '您的登录过期，请重新登录');
+      ElMessage.error('认证失效，请重新登录');
+      localStorage.removeItem('x-token');
+      router.push('/login');
     }
     if (response.data.code === 403) {
       globalStore.setGlobalDialog(true, '请求失败', '您的账号已在其它地方登录，请重新登录');
+      ElMessage.error('您的账号已在其它地方登录，请重新登录');
+      localStorage.removeItem('x-token');
+      router.push('/login');
     }
     return Promise.resolve(response);
   },

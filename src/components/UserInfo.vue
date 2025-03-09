@@ -36,6 +36,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { update } from '@/api/user'
 import type { UserInfo } from '@/types/login'
+import type { ApiResponse } from '@/types/common'
 
 const props = defineProps<{
     modelValue: boolean
@@ -105,13 +106,13 @@ const handleSave = async () => {
             avatar: userInfo.value.avatar
         })
 
-        if (res.code === 0) {
+        if ((res as ApiResponse).code === 0) {
             // 更新store中的用户信息
             userStore.setUser(userInfo.value)
             ElMessage.success('保存成功')
             dialogVisible.value = false
         } else {
-            ElMessage.error(res.msg || '保存失败')
+            ElMessage.error((res as ApiResponse).msg || '保存失败')
         }
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败，请稍后重试')

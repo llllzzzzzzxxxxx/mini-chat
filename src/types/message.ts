@@ -7,6 +7,22 @@ export interface UserInfo {
     badge: string[] | null
 }
 
+// 发送消息参数
+export interface SendMessageParams {
+    msgContent: string
+    targetId: string
+    type: string
+    source: string
+    referenceMsgId?: string
+}
+
+// 发送消息响应
+export interface SendMessageResponse {
+    code: number
+    msg: string
+    data: MessageRecord
+}
+
 // 消息内容项
 export interface MessageContent {
     type: 'text' | 'at' | 'emoji' | 'image' | 'file'
