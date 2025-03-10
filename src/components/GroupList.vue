@@ -21,7 +21,7 @@ import { listMap } from '@/api/user'
 import type { UserMapResponse, UserMapItem } from '@/types/user'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { useMessageStore } from '@/stores/module/useMessageStore'
-import { useChatListStore } from '@/stores/module/usechatListStore'
+import { useChatListStore } from '@/stores/module/useChatListStore'
 import Avatar from '@/components/Avatar.vue'
 import { ElMessage } from 'element-plus'
 const userStore = useUserStore()

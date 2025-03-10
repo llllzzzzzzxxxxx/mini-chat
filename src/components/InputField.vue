@@ -75,12 +75,14 @@ const sendMessage = async () => {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    span{
+
+    span {
         cursor: pointer;
         width: 30px;
         height: 30px;
         margin: 5px 5px 5px 5px;
     }
+
     // border-top: 1px solid #e0e0e0;
     .input-field-input {
         flex: 1;

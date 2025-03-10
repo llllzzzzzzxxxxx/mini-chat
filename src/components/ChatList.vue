@@ -47,8 +47,12 @@
                     <div v-if="chat.lastMessage.type === 'emoji'" class="chat-message">
                         [emoji]
                     </div>
-                    <div v-else class="chat-message" :title="getLatestMessage(chat.targetId)">
+                    <div v-else-if="chat.lastMessage.type === 'text'" class="chat-message"
+                        :title="getLatestMessage(chat.targetId)">
                         {{ getLatestMessage(chat.targetId) }}
+                    </div>
+                    <div v-else-if="chat.lastMessage.type === 'call'" class="chat-message">
+                        [语音通话]
                     </div>
                 </div>
             </div>
@@ -69,7 +73,7 @@ import { ElMessage } from 'element-plus'
 import { formatTime } from '@/utils/date'
 import Avatar from '@/components/Avatar.vue'
 import { useMessageStore } from '@/stores/module/useMessageStore'
-import { useChatListStore } from '@/stores/module/usechatListStore'
+import { useChatListStore } from '@/stores/module/useChatListStore'
 import EventBus from '@/utils/eventBus'
 import { useUserStore } from '@/stores/module/useUserStore'
 
@@ -80,7 +84,7 @@ const userStore = useUserStore()
 // 处理新消息更新聊天列表
 const handleNewMessage = (content: any) => {
     let targetChat = null;
-
+    console.log('content', content)
     // 根据消息类型和发送对象找到对应的聊天
     if (content.source === 'group') {
         // 群聊消息，根据toId（群ID）查找
@@ -102,6 +106,7 @@ const handleNewMessage = (content: any) => {
             targetChat = chatListStore.chatList.find(chat =>
                 chat.type === 'user' && chat.targetId === content.fromId
             );
+            
         }
 
         // 如果没有找到对应的聊天，可能需要创建新的聊天

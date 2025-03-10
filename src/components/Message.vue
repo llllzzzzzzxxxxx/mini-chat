@@ -39,6 +39,14 @@
                         <div class="message-emoji" v-else-if="message.type === 'emoji'">
                             <img :src="message.message as string" alt="emoji" class="emoji-img" />
                         </div>
+                        <div class="message-text" v-else-if="message.type === 'call'">
+                            <div v-if="message.message !== '0'" class="call-content">
+                                <span>[语音通话]</span>
+                            </div>
+                            <div v-else class="call-content">
+                                <span>[未接通]</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -191,6 +199,7 @@ const parseMessageContent = (messageStr: string): string => {
 
 // 处理新消息
 const handleNewMessage = (content: any) => {
+    console.log('content', content)
     if (!messageStore.targetId) return
 
     // 检查消息是否属于当前聊天
@@ -211,7 +220,7 @@ const handleNewMessage = (content: any) => {
         }
 
         // 添加消息到列表
-        // messageStore.appendMessage(newMessage)
+        messageStore.appendMessage(newMessage)
         // 滚动到底部
         scrollToBottom(true)
     }
