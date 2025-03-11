@@ -155,4 +155,4 @@ const disConnect = () => {
   isConnect = false
 }
 
-export default { connect, disConnect }
+export default { connect, disConnect}

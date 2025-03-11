@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', {
             const res = await listMap() as UserMapResponse
             if (res.code === 0) {
                 this.userMap = res.data;
-                console.log('userMap updated:', this.userMap)
+                // console.log('userMap updated:', this.userMap)
             }
         }
     }

@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { MessageRecord, SendMessageParams } from '@/types/message'
 import { send } from '@/api/message'
-
 export const useMessageStore = defineStore('message', () => {
     const targetId = ref('')
     const messages = ref<MessageRecord[]>([])

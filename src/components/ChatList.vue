@@ -84,7 +84,7 @@ const userStore = useUserStore()
 // 处理新消息更新聊天列表
 const handleNewMessage = (content: any) => {
     let targetChat = null;
-    console.log('content', content)
+    console.log('content:chatList', content)
     // 根据消息类型和发送对象找到对应的聊天
     if (content.source === 'group') {
         // 群聊消息，根据toId（群ID）查找
@@ -94,7 +94,7 @@ const handleNewMessage = (content: any) => {
     } else {
         // 私聊消息，需要根据发送者和接收者判断
         const currentUserId = userStore.user?.userId.toString();
-
+        console.log('currentUserId', currentUserId)
         // 如果我是发送者
         if (content.fromId === currentUserId) {
             targetChat = chatListStore.chatList.find(chat =>
@@ -106,7 +106,6 @@ const handleNewMessage = (content: any) => {
             targetChat = chatListStore.chatList.find(chat =>
                 chat.type === 'user' && chat.targetId === content.fromId
             );
-            
         }
 
         // 如果没有找到对应的聊天，可能需要创建新的聊天
@@ -180,7 +179,6 @@ onMounted(() => {
     // 监听新消息
     EventBus.on('on-receive-msg', handleNewMessage)
 })
-
 onBeforeUnmount(() => {
     // 移除事件监听
     EventBus.off('on-receive-msg', handleNewMessage)

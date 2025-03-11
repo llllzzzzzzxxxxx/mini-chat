@@ -218,9 +218,12 @@ const handleNewMessage = (content: any) => {
             createTime: content.createTime,
             updateTime: content.updateTime
         }
-
+        console.log('newMessage', newMessage)
         // 添加消息到列表
-        messageStore.appendMessage(newMessage)
+        if(content.toId === useUserStore().user?.userId.toString()){
+            messageStore.appendMessage(newMessage)
+            
+        }
         // 滚动到底部
         scrollToBottom(true)
     }
@@ -242,7 +245,11 @@ onMounted(async () => {
     scrollToBottom(true)
 
     // 监听新消息
-    EventBus.on('on-receive-msg', handleNewMessage)
+    try {
+        EventBus.on('on-receive-msg', handleNewMessage)
+    } catch (error) {
+        console.log('error', error)
+    }
 })
 
 onBeforeUnmount(() => {
