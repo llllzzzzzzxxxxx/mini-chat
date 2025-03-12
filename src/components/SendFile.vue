@@ -1,12 +1,11 @@
 <template>
     <!-- 文件传输通知 -->
-    <el-dialog v-model="fileTransferStore.isSendFile" title="Warning" width="500" center>
-        <span v-if="isLoading">
+    <el-dialog v-model="fileTransferStore.isSendFile" title="正在向对方发送文件..." width="500" center @close="fileTransferStore.cancelFile(useUserStore().user?.userId.toString() as string)">
+        <span v-if="isLoading" class="waiting">
             等待对方接受文件...
         </span>
         <span v-else>
-            正在传输文件：
-            <el-tag v-if="prop.file">{{ prop.file.name }}-{{ prop.file.size }}</el-tag>
+            <el-tag v-if="prop.file">正在向对方传输文件：{{ prop.file.name }} <br> {{ prop.file.name }}-{{ prop.file.size }}</el-tag>
         </span>
         <template #footer>
             <div class="dialog-footer">
@@ -50,7 +49,7 @@ watch(
 );
 
 const handleFileMsg = (msg: any) => {
-    console.log('SendFileMsg', msg);
+    // console.log('SendFileMsg', msg);
     switch (msg.type) {
         case 'answer':
             handleFileAnswerMsg(msg);
@@ -231,4 +230,11 @@ onBeforeMount(() => {
 
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.waiting{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+</style>

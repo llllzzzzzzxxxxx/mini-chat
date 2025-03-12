@@ -1,19 +1,24 @@
 <template>
     <div>
-        <el-dialog v-model="isDialogVisible" title="Warning" width="500" center>
-            <span v-if="!isReady">
-                来自{{ fromId }}的文件传输请求：
-                <el-tag v-if="fileInfo">{{ fileInfo.name }}-{{ fileInfo.size }}</el-tag>
+        <el-dialog v-model="isDialogVisible" :title="fileTransferTitle" width="500" center @close="cancelTransfer">
+            <span  v-if="!isReady" class="waiting">
+                <el-tag v-if="fileInfo">{{ fileInfo.name }}</el-tag>
+                <div v-if="fileInfo">文件体积：{{ formatSize(fileInfo.size) }}</div>
             </span>
-            <span v-if="isReady">
-                当前进度：{{ progress }}%--{{ receivedSize }}/ {{ fileInfo?.size }}
+            <span v-if="isReady &&fileInfo">
+                当前进度：{{ progress }}% 文件体积： {{ formatSize(fileInfo.size) }}
             </span>
-            <template #footer>
+            <template #footer v-if="progress < 100">
                 <div class="dialog-footer">
                     <el-button @click="acceptFile">接受</el-button>
                 </div>
                 <div class="dialog-footer">
                     <el-button @click="cancelTransfer">拒绝</el-button>
+                </div>
+            </template>
+            <template #footer v-if="progress === 100">
+                <div class="dialog-footer">
+                    传输完成！
                 </div>
             </template>
         </el-dialog>
@@ -58,6 +63,9 @@ const isDialogVisible = computed(() => fileTransferStore.isGetFile && messageSto
 const cancelTransfer = () => {
     fileTransferStore.cancelFile(useUserStore().user?.userId.toString() as string);
 }
+const fileTransferTitle = computed(() => {
+    return fileInfo.value ? `来自${messageStore.chatName}的文件传输请求` : '';
+});
 // 初始化 RTCPeerConnection
 const initRTCPeerConnection = () => {
     const iceServer = {
@@ -94,7 +102,7 @@ const handleICEConnectionStateChangeEvent = () => {
     }
 }
 const handleFileMsg = (msg: any) => {
-    console.log('GetFileMsg', msg);
+    // console.log('GetFileMsg', msg);
     switch (msg.type) {
         case 'invite':
             fileTransferStore.isGetFile = true;
@@ -263,4 +271,14 @@ onBeforeMount(() => {
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.waiting{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    div{
+        margin-top: 10px;
+    }
+}
+</style>
