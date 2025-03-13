@@ -1,7 +1,7 @@
 <template>
     <div class="input-field">
         <div class="input-field-input-container">
-            <span v-if="messageStore.source !== 'group'">
+            <span v-if="messageStore.source !== 'group'" @click="sendVideoChat">
                 <svg t="1741523276007" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="4876" width="29" height="29">
                     <path
@@ -9,7 +9,7 @@
                         fill="#bfbfbf" p-id="4877"></path>
                 </svg>
             </span>
-            <span v-if="messageStore.source !== 'group'">
+            <span v-if="messageStore.source !== 'group'" @click="sendVideoChat">
                 <svg t="1741523318679" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="5995" width="29" height="29">
                     <path
@@ -18,7 +18,7 @@
                 </svg>
             </span>
             <span v-if="messageStore.source !== 'group'" @click="handleFile">
-                <input type="file" ref="fileInput" style="display: none" @change="handleFileChange"  />
+                <input type="file" ref="fileInput" style="display: none" @change="handleFileChange" />
                 <svg t="1741523350582" class="icon" viewBox="0 0 1243 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="7058" width="27" height="27">
                     <path
@@ -42,7 +42,8 @@
     </div>
     <!-- 修改传递给 SendFile 组件的文件 -->
     <SendFile :file="selectedFile"></SendFile>
-    <GetFile ></GetFile>
+    <GetFile></GetFile>
+    <VideoChat :isVideoChat="videoStatus" @update:videoStatus="handleUpdateVideoStatus"></VideoChat>
 </template>
 
 <script setup lang="ts">
@@ -52,13 +53,16 @@ import { send } from '@/api/message'
 import { useMessageStore } from '@/stores/module/useMessageStore'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { useFileTransferStore } from '@/stores/module/useFileTransferStore'
-import { invite, upload } from '@/api/file'
+import { invite } from '@/api/file'
+import { vedioInvite } from '@/api/video'
 import SendFile from './SendFile.vue'
 import GetFile from './GetFile.vue'
+import VideoChat from './VideoChat.vue'
 const message = ref('')
 const messageStore = useMessageStore()
 // 新增一个响应式变量来存储选择的文件
-const selectedFile = ref<File | undefined>(); 
+const selectedFile = ref<File | undefined>();
+const videoStatus = ref(false);
 
 const sendMessage = async () => {
     const params: SendMessageParams = {
@@ -73,12 +77,12 @@ const sendMessage = async () => {
     try {
         await messageStore.sendMessage(params);
         message.value = ''
-        
+
     } catch (error) {
         console.log(error)
     }
 }
-const fileInput = ref<HTMLInputElement | null>(null); 
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const handleFileChange = async () => {
     if (fileInput.value?.files?.length) {
@@ -88,25 +92,35 @@ const handleFileChange = async () => {
         try {
             await invite({
                 userId: messageStore.targetId,
-                fileInfo:{
+                fileInfo: {
                     "name": file.name,
                     "size": file.size,
                 }
-            }) 
+            })
             useFileTransferStore().isSendFile = true;
             // useFileTransferStore().setFile(file);
             // 将选择的文件赋值给 selectedFile 变量
-            selectedFile.value = file; 
+            selectedFile.value = file;
             console.log('文件传输邀请成功');
         } catch (error) {
             console.error('文件上传失败', error);
         }
     }
 };
-
-const handleFile = () => {    
+const sendVideoChat = async () => {
+    const param = {
+        "onlyAudio": false,//TODO 语音和视频切换
+        "userId": messageStore.targetId,
+    }
+    await vedioInvite(param);
+    videoStatus.value = true;
+}
+const handleUpdateVideoStatus = (newStatus: boolean) => {
+  videoStatus.value = newStatus;
+};
+const handleFile = () => {
     console.log('handleFile');
-    fileInput.value?.click(); 
+    fileInput.value?.click();
 };
 </script>
 

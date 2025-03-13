@@ -53,7 +53,7 @@ const acceptFile = async () => {
     isReady.value = true
     await nextTick(async () => {
         initRTCPeerConnection()
-    })
+    })//
     await accept({ userId: fromId.value }).catch((error) => {
         console.error('发送接受请求出错:', error)
         ElMessage('发送接受请求出错，请重试')

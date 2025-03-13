@@ -8,7 +8,7 @@ export const candidate = (param: any) => Http.post(`/api/v1/call/candidate`, par
 
 export const hangup = (param: any) => Http.post(`/api/v1/call/hangup`, param);
 
-export const invite = (param: any) => Http.post(`/api/v1/call/invite`, param);
+export const vedioInvite = (param: any) => Http.post(`/api/v1/call/invite`, param);
 
 export const accept = (param: any) => Http.post(`/api/v1/call/accept`, param);
 
