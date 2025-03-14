@@ -9,7 +9,7 @@
                         fill="#bfbfbf" p-id="4877"></path>
                 </svg>
             </span>
-            <span v-if="messageStore.source !== 'group'" @click="sendVideoChat">
+            <span v-if="messageStore.source !== 'group'" @click="sendPhoneChat">
                 <svg t="1741523318679" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="5995" width="29" height="29">
                     <path
@@ -43,11 +43,16 @@
     <!-- 修改传递给 SendFile 组件的文件 -->
     <SendFile :file="selectedFile"></SendFile>
     <GetFile></GetFile>
-    <VideoChat :isVideoChat="videoStatus" @update:videoStatus="handleUpdateVideoStatus"></VideoChat>
+    <VideoChat :isVideoChat="videoStatus"
+    :is-caller="isCaller"
+    :is-called="isCalled"
+    :target-info="targetInfo"
+    :only-audio="onlyAudio"
+    @update:videoStatus="handleUpdateVideoStatus"></VideoChat>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onBeforeUnmount } from 'vue'
+import { onMounted, ref, onBeforeUnmount, onUnmounted } from 'vue'
 import type { SendMessageParams } from '@/types/message'
 import { send } from '@/api/message'
 import { useMessageStore } from '@/stores/module/useMessageStore'
@@ -55,15 +60,21 @@ import { useUserStore } from '@/stores/module/useUserStore'
 import { useFileTransferStore } from '@/stores/module/useFileTransferStore'
 import { invite } from '@/api/file'
 import { vedioInvite } from '@/api/video'
+import eventBus from '@/utils/eventBus'
 import SendFile from './SendFile.vue'
+
 import GetFile from './GetFile.vue'
 import VideoChat from './VideoChat.vue'
+import { useChatListStore } from '@/stores/module/useChatListStore'
 const message = ref('')
 const messageStore = useMessageStore()
 // 新增一个响应式变量来存储选择的文件
 const selectedFile = ref<File | undefined>();
 const videoStatus = ref(false);
-
+const isCalled = ref(false);
+const isCaller = ref(false);
+const targetInfo = ref({});
+const onlyAudio = ref(false);
 const sendMessage = async () => {
     const params: SendMessageParams = {
         msgContent: JSON.stringify([{
@@ -112,16 +123,64 @@ const sendVideoChat = async () => {
         "onlyAudio": false,//TODO 语音和视频切换
         "userId": messageStore.targetId,
     }
+    onlyAudio.value = false;
     await vedioInvite(param);
+    isCaller.value = true;
     videoStatus.value = true;
+    targetInfo.value = {
+        "userId": messageStore.targetId,
+        "targetName": messageStore.chatName
+    }
 }
-const handleUpdateVideoStatus = (newStatus: boolean) => {
-  videoStatus.value = newStatus;
+const sendPhoneChat = async () => {
+    const param = {
+        "onlyAudio": true,//TODO 语音和视频切换
+        "userId": messageStore.targetId,
+    }
+    onlyAudio.value = true;
+    await vedioInvite(param);
+    isCaller.value = true;
+    videoStatus.value = true;
+    targetInfo.value = {
+        "userId": messageStore.targetId,
+        "targetName": messageStore.chatName
+    }
+}
+const handleUpdateVideoStatus = () => {
+  videoStatus.value = false;
+  isCalled.value = false;
+  isCaller.value = false;
 };
+
 const handleFile = () => {
     console.log('handleFile');
     fileInput.value?.click();
 };
+
+const handlerVideoMsg = async (msg:any) => {
+    console.log(msg)
+    if (msg.type === 'invite') {
+        videoStatus.value = true;
+        isCalled.value = true;
+        const userMap = await useUserStore().userMap;
+        // 通过 msg.userId 从 userMap 中获取对应的用户信息
+        const userInfo = userMap[msg.fromId];
+        // 从用户信息中提取 targetName
+        const targetName = userInfo ? userInfo.name : '未知用户';
+        console.log(msg.fromId);
+        targetInfo.value = {
+            "userId": msg.fromId,
+            "targetName": targetName,
+        }
+    }
+}
+
+onMounted(async() => {
+    eventBus.on('on-receive-video', handlerVideoMsg)
+})
+onUnmounted(async() => {
+    eventBus.off('on-receive-video', handlerVideoMsg)
+})
 </script>
 
 <style scoped lang="scss">
