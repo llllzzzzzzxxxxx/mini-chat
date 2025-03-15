@@ -160,8 +160,6 @@ const handleFile = () => {
 const handlerVideoMsg = async (msg:any) => {
     console.log(msg)
     if (msg.type === 'invite') {
-        videoStatus.value = true;
-        isCalled.value = true;
         const userMap = await useUserStore().userMap;
         // 通过 msg.userId 从 userMap 中获取对应的用户信息
         const userInfo = userMap[msg.fromId];
@@ -172,6 +170,8 @@ const handlerVideoMsg = async (msg:any) => {
             "userId": msg.fromId,
             "targetName": targetName,
         }
+        videoStatus.value = true;
+        isCalled.value = true;
     }
 }
 

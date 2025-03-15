@@ -45,14 +45,14 @@
                         <span class="chat-time">{{ formatTime(chat.updateTime) }}</span>
                     </div>
                     <div v-if="chat.lastMessage.type === 'emoji'" class="chat-message">
-                        [emoji]
+                        [动画表情]
                     </div>
                     <div v-else-if="chat.lastMessage.type === 'text'" class="chat-message"
                         :title="getLatestMessage(chat.targetId)">
                         {{ getLatestMessage(chat.targetId) }}
                     </div>
                     <div v-else-if="chat.lastMessage.type === 'call'" class="chat-message">
-                        [语音通话]
+                        {{ getLatestMessage(chat.targetId) }}
                     </div>
                 </div>
             </div>
@@ -122,7 +122,7 @@ const handleNewMessage = (content: any) => {
         if (targetChat.targetId !== messageStore.targetId) {
             targetChat.unreadCount = (targetChat.unreadCount || 0) + 1;
         }
-
+        chatListStore.readChat(targetChat.targetId)
         // 更新最后一条消息
         targetChat.lastMessage = {
             id: content.id,
@@ -159,7 +159,10 @@ const handleChatClick = (chat: ChatListItem) => {
 const getLatestMessage = (targetId: string): string => {
     const chat = chatListStore.chatList.find(item => item.targetId === targetId)
     if (!chat?.lastMessage.message) return '暂无消息'
-
+    if(chat.lastMessage.type === 'call'){
+        if(chat.lastMessage.message==='0')return '[未接通]';
+        else return '[语音通话]';
+    }
     try {
         if (typeof chat.lastMessage.message === 'string') {
             const messageObj = JSON.parse(chat.lastMessage.message)

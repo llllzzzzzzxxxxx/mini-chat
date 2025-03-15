@@ -40,8 +40,8 @@
                             <img :src="message.message as string" alt="emoji" class="emoji-img" />
                         </div>
                         <div class="message-text" v-else-if="message.type === 'call'">
-                            <div v-if="message.message !== '0'" class="call-content">
-                                <span>[语音通话]</span>
+                            <div v-if="message.message !== '0'&&typeof(message.message)==='string'" class="call-content">
+                                <span>[通话时长：{{formattedTime(message.message)}}]</span>
                             </div>
                             <div v-else class="call-content">
                                 <span>[未接通]</span>
@@ -66,6 +66,8 @@ import { useUserStore } from '@/stores/module/useUserStore'
 import { useMessageStore } from '@/stores/module/useMessageStore'
 import InputField from '@/components/InputField.vue'
 import EventBus from '@/utils/eventBus'
+import { formatTimingTime } from '@/utils/date';
+
 // import { CircleClose } from '@element-plus/icons-vue'
 
 const messageList = ref<HTMLElement | null>(null)
@@ -157,7 +159,7 @@ const fetchMessages = async () => {
         hasMore.value = true
         const params: RecordParams = {
             index: 0,
-            num: 10,
+            num: 30,
             targetId: messageStore.targetId
         }
         const res = await record(params)
@@ -173,7 +175,9 @@ const fetchMessages = async () => {
         messageStore.loading = false
     }
 }
-
+const formattedTime = (time: string) => {
+    return formatTimingTime(Number(time))
+}
 // 检查字符串是否为JSON格式
 const isJsonString = (str: string): boolean => {
     try {
