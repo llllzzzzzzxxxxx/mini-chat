@@ -48,24 +48,6 @@ import GroupList from '@/components/GroupList.vue'
 const router = useRouter()
 const userStore = useUserStore()
 const showUserInfo = ref(false)
-
-// 处理退出登录
-const handleLogout = async () => {
-    try {
-        const res = await logout() as ApiResponse
-        // 清除用户信息
-        userStore.clearUser()
-        // 清除token
-        localStorage.removeItem('x-token')
-        localStorage.removeItem('user')
-        ElMessage.success('退出成功')
-        // 跳转到登录页
-        router.push('/login')
-
-    } catch (error: any) {
-        ElMessage.error(error.message || '退出失败，请稍后重试')
-    }
-}
 </script>
 
 <style scoped lang="scss">

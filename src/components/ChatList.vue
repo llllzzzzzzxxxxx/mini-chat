@@ -191,8 +191,10 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .chat-list {
     width: 100%;
-    height: 100%;
-    overflow-y: auto;
+    height: 100%; 
+    /* 确保高度为固定值或有最大高度限制，超出部分显示滚动条 */
+    max-height: 600px; 
+    overflow-y: auto; 
     background: #fff;
     border-radius: 8px;
     padding: 10px 0;
@@ -326,19 +328,30 @@ onBeforeUnmount(() => {
         align-items: center;
         justify-content: center;
     }
-}
 
-// 自定义滚动条样式
-.chat-list::-webkit-scrollbar {
-    width: 6px;
-}
 
-.chat-list::-webkit-scrollbar-thumb {
-    background-color: #dcdfe6;
-    border-radius: 3px;
-}
 
-.chat-list::-webkit-scrollbar-track {
-    background-color: transparent;
+
+
+
+    /* 自定义滚动条样式 */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+
+
+
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #dcdfe6;
+        border-radius: 3px;
+    }
+
+
+
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
 }
 </style>
