@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog v-model="isDialogVisible" :title="fileTransferTitle" width="500" center @close="cancelTransfer">
+        <el-dialog class="get-file" v-model="isDialogVisible" :title="fileTransferTitle" width="400" center @close="cancelTransfer">
             <span  v-if="!isReady" class="waiting">
                 <el-tag v-if="fileInfo">{{ fileInfo.name }}</el-tag>
                 <div v-if="fileInfo">文件体积：{{ formatSize(fileInfo.size) }}</div>
@@ -272,6 +272,13 @@ onBeforeMount(() => {
 </script>
 
 <style scoped lang="scss">
+.get-file{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%
+}
 .waiting{
     display: flex;
     flex-direction: column;

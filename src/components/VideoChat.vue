@@ -3,9 +3,11 @@
         <div class="video-chat">
 
             <!-- 自己的视频 -->
-            <video ref="local" autoplay muted playsinline style="position: absolute; top: 0; left: 0; width: 0; height: 0;"></video>
+            <video ref="local" autoplay muted playsinline
+                style="position: absolute; top: 0; left: 0; width: 0; height: 0;"></video>
             <!-- 对方的视频 -->
-            <video ref="remote" autoplay playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></video>
+            <video ref="remote" autoplay playsinline
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></video>
 
             <!-- 发起者按钮 -->
             <div v-if="props.isCaller && !isConnected" class="button-container">
@@ -133,7 +135,7 @@ import { useUserStore } from '@/stores/module/useUserStore';
 import { formatTimingTime } from '@/utils/date';
 import Avatar from './Avatar.vue';
 import { useMessageStore } from '@/stores/module/useMessageStore';
-import type{SendMessageParams} from '@/types/message'
+import type { SendMessageParams } from '@/types/message'
 const props = defineProps({
     isVideoChat: {
         type: Boolean,
@@ -208,6 +210,19 @@ const handlerVideoMsg = (msg: any) => {
             handleDestroyTime();
             setTimeout(async function () {
                 emit('update:videoStatus');
+                if (props.isCaller) {
+                    const params: SendMessageParams = {
+                        msgContent: String(time.value),
+                        targetId: props.targetInfo.userId,
+                        type: 'call',
+                        source: useUserStore().user?.type as string,
+                    }
+                    try {
+                        await useMessageStore().sendMessage(params);
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }
             }, 1000);
             break;
         }
@@ -451,6 +466,10 @@ onUnmounted(async () => {
     justify-content: center;
     align-items: center;
 
+    @media screen and (max-width: 700px) {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .video-chat {
@@ -470,6 +489,7 @@ onUnmounted(async () => {
         justify-content: center;
         align-items: center;
     }
+
 }
 
 video {

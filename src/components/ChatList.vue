@@ -61,6 +61,9 @@
         <div v-if="chatListStore.chatList.length === 0" class="empty-list">
             <el-empty description="暂无聊天消息" />
         </div>
+        <div class="logout" >
+            
+        </div>
     </div>
 </template>
 
@@ -198,7 +201,9 @@ onBeforeUnmount(() => {
     background: #fff;
     border-radius: 8px;
     padding: 10px 0;
-
+    @media screen and (max-width: 700px) {
+        max-height: 100%;
+    }
     .chat-section {
         margin-bottom: 20px;
 

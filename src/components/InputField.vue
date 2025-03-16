@@ -210,5 +210,13 @@ onUnmounted(async() => {
         max-height: 200px;
         overflow-y: auto;
     }
+    @media (max-width: 700px){
+        .input-field-input{
+            bottom: 0%;
+        }
+        .input-field-input-container{
+            
+        }
+    }
 }
 </style>

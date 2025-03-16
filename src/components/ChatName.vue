@@ -1,22 +1,25 @@
 <template>
     <div class="chat-name">
-        {{ chatName }}
+        <div>{{ chatName }}</div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useMessageStore } from '@/stores/module/useMessageStore'
-
+import Avatar from './Avatar.vue'
+import { useUserStore } from '@/stores/module/useUserStore'
 const messageStore = useMessageStore()
-
+const name = ref('')
 const chatName = ref('')
 watch(() => messageStore.targetId, (newId: string) => {
     if (newId) {
         chatName.value = messageStore.getChatName(newId)
     }
 })
-
+onMounted(() => {
+    name.value = useUserStore().user?.userName || ''
+})
 </script>
 
 <style scoped>

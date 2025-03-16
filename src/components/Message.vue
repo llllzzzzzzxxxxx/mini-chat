@@ -390,4 +390,9 @@ onBeforeUnmount(() => {
         border-radius: 4px;
     }
 }
+@media (max-width: 700px){
+    .message-list{
+        height: calc(100vh - 160px);
+    }
+}
 </style>

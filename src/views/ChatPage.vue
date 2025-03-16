@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div @click="handleOutsideClick">
         <div class="header">
             <div class="header-left">
                 <div class="header-left-title">
@@ -7,8 +7,20 @@
                 </div>
             </div>
             <div class="header-center">
-                <div class="header-center-title">  
-                    <ChatName/>
+                <div class="header-center-avatar" @click="toggleChatList($event)"> <!-- 修改：传递事件对象 -->
+                    <Avatar :name="useUserStore().user?.userName || ''" :size="40" />
+                </div>
+                <div class="header-center-title">
+                    <ChatName />
+                </div>
+                <div class="online-people">
+                    <svg t="1742050496528" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                        xmlns="http://www.w3.org/2000/svg" p-id="16462" width="40" height="40">
+                        <path
+                            d="M690.338 661.474c-41.498-18.374-103.937-65.868-195.163-82.197 23.332-24.985 40.564-63.996 58.672-110.231 10.528-26.786 8.425-49.62 8.425-82.185 0-24.002 4.507-62.528-1.502-83.71-20.073-71.577-71.002-91.29-130.507-91.29-59.583 0-110.473 19.828-130.557 91.452-5.848 21.24-1.355 59.627-1.355 83.548 0 32.623-1.764 55.56 8.787 82.359 18.247 46.477 35.683 85.444 58.865 110.347-90.428 16.525-148.928 63.73-190.16 82.047-85.32 38.11-83.219 79.828-83.219 79.828v70.698l685.644-0.128v-70.57c0-0.001-2.262-41.88-87.93-79.968zM659.56 227.805h271.187v59.352H659.56v-59.352z m0 129.96h165.782v60.375H659.56v-60.375z"
+                            fill="#1296DB" p-id="16463"></path>
+                        <path d="M659.56 487.725h237.417V548.1H659.56v-60.375z" fill="#1296DB" p-id="16464"></path>
+                    </svg>
                 </div>
             </div>
             <div class="header-right">
@@ -20,6 +32,9 @@
                 <ChatList></ChatList>
             </div>
             <div class="main-center">
+                <!-- 修改 v-if 为 v-show -->
+                <ChatList class="mobile-chat-list"
+                    :style="showChatList? 'transform: translateX(0%);' : 'transform: translateX(-100%);'" />
                 <Message></Message>
             </div>
             <div class="main-right">
@@ -33,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { logout } from '@/api/login'
@@ -45,17 +60,43 @@ import Message from '@/components/Message.vue'
 import ChatName from '@/components/ChatName.vue'
 import UserItem from '@/components/UserItem.vue'
 import GroupList from '@/components/GroupList.vue'
+import Avatar from '@/components/Avatar.vue'
+
 const router = useRouter()
 const userStore = useUserStore()
 const showUserInfo = ref(false)
+const showSidebars = ref(true)
+const showChatList = ref(false)
+
+const toggleChatList = (event: MouseEvent) => {
+    event.stopPropagation() // 阻止事件冒泡
+    showChatList.value = !showChatList.value
+    console.log('toggleChatList 被触发，showChatList:', showChatList.value) // 添加日志输出
+}
+
+const handleOutsideClick = (event: MouseEvent) => {
+    const target = event.target as HTMLElement
+    const avatar = document.querySelector('.header-center-avatar') as HTMLElement
+    const chatList = document.querySelector('.main-left') as HTMLElement
+
+    console.log('handleOutsideClick 被触发', showChatList.value) // 添加日志输出
+    if (showChatList.value && !chatList.contains(target) && target !== avatar) {
+        showChatList.value = false
+        console.log('showChatList 被设置为 false', showChatList.value) // 添加日志输出
+    }
+}
 </script>
 
 <style scoped lang="scss">
+// 定义一个变量来存储列宽设置
+$column-layout: 1fr 3fr 1fr;
+
 .header {
     width: 100%;
     height: 70px;
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    // 使用变量设置列宽
+    grid-template-columns: $column-layout;
     align-items: center;
     justify-content: center;
     gap: 5px;
@@ -65,7 +106,7 @@ const showUserInfo = ref(false)
     .header-left {
         grid-area: left;
         border: #ffffff 3px solid;
-        width: 100%;
+        width: 234px;
         height: 100%;
         border-radius: 5px;
         display: flex;
@@ -84,10 +125,36 @@ const showUserInfo = ref(false)
         width: 100%;
         border-radius: 5px;
         display: flex;
-        justify-content: center;
         align-items: center;
         height: 100%;
         background: #EFF5FD;
+
+        @media screen and (max-width: 700px) {
+            border: none;
+            justify-content: space-between;
+
+            .header-center-avatar {
+                margin-left: 1vh;
+                cursor: pointer;
+            }
+
+            .online-people {
+                margin-right: 1vh;
+                cursor: pointer;
+            }
+        }
+
+        @media screen and (min-width: 700px) {
+            justify-content: center;
+
+            .header-center-avatar {
+                display: none;
+            }
+
+            .online-people {
+                display: none;
+            }
+        }
     }
 
     .header-right {
@@ -101,8 +168,14 @@ const showUserInfo = ref(false)
         align-items: center;
         height: 100%;
         background: #EFF5FD;
+    }
 
-        
+    .toggle-btn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
     }
 }
 
@@ -110,7 +183,8 @@ const showUserInfo = ref(false)
     width: 100%;
     height: calc(100vh - 200px);
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    // 使用相同的变量设置列宽
+    grid-template-columns: $column-layout;
     grid-template-areas: "left center right";
     gap: 5px;
 
@@ -121,14 +195,45 @@ const showUserInfo = ref(false)
         margin-top: 5px;
         grid-area: left;
         background: #EDF5FE;
+        transition: transform 0.3s ease;
+        z-index: 100;
     }
-
     .main-center {
         grid-area: center;
         border: #ffffff 3px solid;
         margin-top: 5px;
         border-radius: 5px;
         background: #E8F0FB;
+
+        @media screen and (min-width: 700px) {
+            .mobile-chat-list{
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 700px) {
+            margin-top: 0;
+            border: none;
+            .mobile-chat-list {
+                transition: all 0.5s ease;
+                position: absolute;
+                z-index: 100; 
+                opacity: 1;
+                display: block;
+                transform: translateX(-100%);
+                width: 70%;
+                .slide-in {
+                    opacity: 0;
+                    transform: translateX(0%);
+                }
+                .slide-out {
+                    opacity: 1;
+                    z-index: 100;
+                    transform: translateX(-100%);
+                }
+            }
+
+        }
     }
 
     .main-right {
@@ -137,6 +242,60 @@ const showUserInfo = ref(false)
         border-radius: 5px;
         grid-area: right;
         background: #EDF5FE;
+    }
+}
+
+@media (max-width: 700px) {
+    .header {
+        grid-template-columns: 1fr;
+        grid-template-areas: "center";
+
+        .toggle-btn {
+            display: block;
+        }
+
+        .header-left,
+        .header-right {
+            display: none;
+        }
+
+        .main-center {
+            height: 100vh;
+            width: 100%;
+        }
+
+        &.show-sidebars .header-left,
+        &.show-sidebars .header-right {
+            display: flex;
+        }
+    }
+
+    .main {
+        grid-template-columns: 1fr;
+        grid-template-areas: "center";
+
+        .main-left,
+        .main-right {
+            display: none;
+        }
+
+        &.show-sidebars .main-left,
+        &.show-sidebars .main-right {
+            display: block;
+            z-index: 999;
+        }
+        .main-left {
+            position: absolute;
+            top: 70px; // 调整到合适的位置
+            left: 0;
+            width: 70%; // 调整宽度
+            height: calc(100vh - 70px); // 调整高度
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); // 添加阴影效果
+        }
+
+        .main-center {
+            height: 100vh;
+        }
     }
 }
 </style>

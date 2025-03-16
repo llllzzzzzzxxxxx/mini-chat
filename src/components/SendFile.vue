@@ -1,12 +1,12 @@
 <template>
     <!-- 文件传输通知 -->
-    <el-dialog v-model="fileTransferStore.isSendFile" title="正在向对方发送文件..." width="500" center @close="fileTransferStore.cancelFile(useUserStore().user?.userId.toString() as string)">
+    <el-dialog class="send-file" v-model="fileTransferStore.isSendFile" title="正在向对方发送文件..." width="400" center @close="fileTransferStore.cancelFile(useUserStore().user?.userId.toString() as string)">
         <span v-if="isLoading" class="waiting">
             等待对方接受文件...
         </span>
         <span v-else>
-            <el-tag v-if="prop.file&&progress<100">正在向对方传输文件：{{ prop.file.name }} <br> {{ progress }}/{{ prop.file.size }}</el-tag>
-            <el-tag v-else-if="progress===100"> 传输完成！ </el-tag>
+            <el-tag class="el-tag" v-if="prop.file&&progress<100">正在向对方传输文件：{{ prop.file.name }} <br> {{ progress }}/{{ prop.file.size }}</el-tag>
+            <el-tag class="el-tag" v-else-if="progress===100"> 传输完成！ </el-tag>
         </span>
         <template #footer>
             <div class="dialog-footer">
@@ -232,6 +232,20 @@ onBeforeMount(() => {
 </script>
 
 <style scoped lang="scss">
+.send-file{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    span{
+        border: none;
+        text-align: center;
+        font-size: 16px;
+        display: block;
+        background: #ffffff;
+    }
+}
 .waiting{
     display: flex;
     justify-content: center;
