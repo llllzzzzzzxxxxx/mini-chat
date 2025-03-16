@@ -7,13 +7,13 @@
                 </div>
             </div>
             <div class="header-center">
-                <div class="header-center-avatar" @click="toggleChatList($event)"> <!-- 修改：传递事件对象 -->
+                <div class="header-center-avatar" @click="toggleChatList($event)">
                     <Avatar :name="useUserStore().user?.userName || ''" :size="40" />
                 </div>
                 <div class="header-center-title">
                     <ChatName />
                 </div>
-                <div class="online-people">
+                <div class="online-people" @click="toggleGroupList($event)">
                     <svg t="1742050496528" class="icon" viewBox="0 0 1024 1024" version="1.1"
                         xmlns="http://www.w3.org/2000/svg" p-id="16462" width="40" height="40">
                         <path
@@ -35,8 +35,12 @@
                 <!-- 修改 v-if 为 v-show -->
                 <ChatList class="mobile-chat-list"
                     :style="showChatList? 'transform: translateX(0%);' : 'transform: translateX(-100%);'" />
+                <GroupList class="mobile-group-list"
+                    :style="showGroupList? 'transform: translateX(70%);' : 'transform: translateX(200%);'" />
                 <Message></Message>
+                
             </div>
+            
             <div class="main-right">
                 <GroupList></GroupList>
             </div>
@@ -67,23 +71,34 @@ const userStore = useUserStore()
 const showUserInfo = ref(false)
 const showSidebars = ref(true)
 const showChatList = ref(false)
+const showGroupList = ref(false)
 
 const toggleChatList = (event: MouseEvent) => {
     event.stopPropagation() // 阻止事件冒泡
     showChatList.value = !showChatList.value
-    console.log('toggleChatList 被触发，showChatList:', showChatList.value) // 添加日志输出
+    console.log('toggleChatList 被触发，showChatList:', showChatList.value)
 }
 
 const handleOutsideClick = (event: MouseEvent) => {
     const target = event.target as HTMLElement
     const avatar = document.querySelector('.header-center-avatar') as HTMLElement
     const chatList = document.querySelector('.main-left') as HTMLElement
+    const groupList = document.querySelector('.mobile-group-list') as HTMLElement
 
-    console.log('handleOutsideClick 被触发', showChatList.value) // 添加日志输出
-    if (showChatList.value && !chatList.contains(target) && target !== avatar) {
+    if (showChatList.value && !chatList.contains(target) && target!== avatar) {
         showChatList.value = false
-        console.log('showChatList 被设置为 false', showChatList.value) // 添加日志输出
+        console.log('showChatList 被设置为 false', showChatList.value)
     }
+    if (showGroupList.value && !groupList.contains(target) && target!== avatar) {
+        showGroupList.value = false
+        console.log('showGroupList 被设置为 false', showGroupList.value)
+    }
+}
+
+const toggleGroupList = (event: MouseEvent) => {
+    event.stopPropagation() // 阻止事件冒泡
+    showGroupList.value = !showGroupList.value
+    console.log('toggleGroupList 被触发，showGroupList:', showGroupList.value)
 }
 </script>
 
@@ -183,7 +198,6 @@ $column-layout: 1fr 3fr 1fr;
     width: 100%;
     height: calc(100vh - 200px);
     display: grid;
-    // 使用相同的变量设置列宽
     grid-template-columns: $column-layout;
     grid-template-areas: "left center right";
     gap: 5px;
@@ -209,6 +223,9 @@ $column-layout: 1fr 3fr 1fr;
             .mobile-chat-list{
                 display: none;
             }
+            .mobile-group-list{
+                display: none;
+            }
         }
 
         @media screen and (max-width: 700px) {
@@ -230,6 +247,25 @@ $column-layout: 1fr 3fr 1fr;
                     opacity: 1;
                     z-index: 100;
                     transform: translateX(-100%);
+                }
+            }
+            .mobile-group-list{
+                transition: all 0.5s ease;
+                position: absolute;
+                top:70px;
+                z-index: 110; // 确保 GroupList 在 ChatList 之上
+                opacity: 1;
+                display: block;
+                transform: translateX(100%);
+                width: 70%;
+                .slide-in {
+                    opacity: 0;
+                    transform: translateX(0%);
+                }
+                .slide-out {
+                    opacity: 1;
+                    z-index: 101;
+                    transform: translateX(100%);
                 }
             }
 
@@ -291,6 +327,14 @@ $column-layout: 1fr 3fr 1fr;
             width: 70%; // 调整宽度
             height: calc(100vh - 70px); // 调整高度
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); // 添加阴影效果
+        }
+        .main-right {
+            position: absolute;
+            top: 70px; // 调整到合适的位置
+            right: 0;
+            width: 30%; // 调整宽度
+            height: calc(100vh - 70px); // 调整高度
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2); // 添加阴影效果
         }
 
         .main-center {

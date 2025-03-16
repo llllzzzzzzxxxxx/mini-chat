@@ -50,11 +50,14 @@ const sortUserList = () => {
         return 0
     })
 }
-
+interface OnlineWebResponse {
+    code: number;
+    data: string[]; // 假设 data 是一个字符串数组，根据实际情况调整
+}
 // 更新用户在线状态
 const updateUserOnlineStatus = async () => {
     try {
-        const res = await onlineWeb()
+        const res = await onlineWeb() as OnlineWebResponse;
         if (res.code === 0) {
             const onlineUserIds = res.data
             userListWithOnlineStatus.value.forEach(user => {
@@ -118,7 +121,9 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 10px;
     justify-content: center;
-
+    @media screen and (max-width: 700px) {
+        max-height: 100%;
+    }
     .group-list-item {
         display: flex;
         width: 100%;

@@ -61,8 +61,21 @@
         <div v-if="chatListStore.chatList.length === 0" class="empty-list">
             <el-empty description="暂无聊天消息" />
         </div>
-        <div class="logout" >
-            
+        <div class="logout" @click="handleLogout">
+            <span>
+                <svg t="1742137731845" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="4543" width="37" height="37">
+                    <path
+                        d="M814 65.9H265.7c-80.5 0-146 65.5-146 146V320c0 19.9 16.1 36 36 36s36-16.1 36-36V211.9c0-40.8 33.2-74 74-74H814c40.8 0 74 33.2 74 74v602.6c0 40.8-33.2 74-74 74H265.7c-40.8 0-74-33.2-74-74V704.2c0-19.9-16.1-36-36-36s-36 16.1-36 36v110.3c0 80.5 65.5 146 146 146H814c80.5 0 146-65.5 146-146V211.9c0-80.5-65.5-146-146-146z"
+                        p-id="4544" fill="#8a8a8a"></path>
+                    <path
+                        d="M549.7 680.5c-13.5 14.6-12.6 37.4 2 50.9 6.9 6.4 15.7 9.6 24.4 9.6 9.7 0 19.4-3.9 26.5-11.6l177.4-192c6.5-7 9.6-15.9 9.5-24.8 0.1-8.8-3.1-17.7-9.5-24.8l-177.4-192c-13.5-14.6-36.3-15.5-50.9-2-14.6 13.5-15.5 36.3-2 50.9l121.6 131.6H100c-19.9 0-36 16.1-36 36s16.1 36 36 36h571.8L549.7 680.5z"
+                        p-id="4545" fill="#8a8a8a"></path>
+                </svg>
+            </span>
+            <span>
+                退出登录
+            </span>
         </div>
     </div>
 </template>
@@ -162,8 +175,8 @@ const handleChatClick = (chat: ChatListItem) => {
 const getLatestMessage = (targetId: string): string => {
     const chat = chatListStore.chatList.find(item => item.targetId === targetId)
     if (!chat?.lastMessage.message) return '暂无消息'
-    if(chat.lastMessage.type === 'call'){
-        if(chat.lastMessage.message==='0')return '[未接通]';
+    if (chat.lastMessage.type === 'call') {
+        if (chat.lastMessage.message === '0') return '[未接通]';
         else return '[语音通话]';
     }
     try {
@@ -179,7 +192,9 @@ const getLatestMessage = (targetId: string): string => {
         return chat.lastMessage.toString()
     }
 }
-
+const handleLogout = ()=>{
+    userStore.logout()
+}
 onMounted(() => {
     chatListStore.fetchAllChats()
     // 监听新消息
@@ -194,16 +209,18 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .chat-list {
     width: 100%;
-    height: 100%; 
+    height: 100%;
     /* 确保高度为固定值或有最大高度限制，超出部分显示滚动条 */
-    max-height: 600px; 
-    overflow-y: auto; 
+    max-height: 600px;
+    overflow-y: auto;
     background: #fff;
     border-radius: 8px;
     padding: 10px 0;
+
     @media screen and (max-width: 700px) {
         max-height: 100%;
     }
+
     .chat-section {
         margin-bottom: 20px;
 
@@ -357,6 +374,30 @@ onBeforeUnmount(() => {
 
     &::-webkit-scrollbar-track {
         background-color: transparent;
+    }
+    .logout{
+        display: none;
+        @media screen and (max-width: 700px) {
+            bottom: 80px;
+            width: 100%;
+            height: 50px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            span{
+                padding-left: 20px;
+                padding-right: 25px;
+                padding-top: 15px;
+                font-weight: 500;
+                font-size: 17px;
+            }
+        }
     }
 }
 </style>
