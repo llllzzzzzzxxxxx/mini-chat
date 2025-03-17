@@ -51,15 +51,17 @@ const sortedUserList = ref<(UserMapItem & { isOnline: boolean })[]>([])
 const sortUserList = () => {
     sortedUserList.value = userListWithOnlineStatus.value.sort((a, b) => {
         if (a.isOnline && !b.isOnline) {
-            return -1
+            return -1;
         }
         if (!a.isOnline && b.isOnline) {
-            onlinePeople.value++
-            return 1
+            return 1;
         }
-        return 0
-    }).filter(user => user.id !== userStore.user?.userId.toString())
-}
+        return 0;
+    }).filter(user => user.id !== userStore.user?.userId.toString());
+
+    // 重新计算在线用户数量
+    onlinePeople.value = sortedUserList.value.filter(user => user.isOnline).length;
+};
 interface OnlineWebResponse {
     code: number;
     data: string[]; // 假设 data 是一个字符串数组，根据实际情况调整
@@ -69,34 +71,33 @@ const updateUserOnlineStatus = async () => {
     try {
         const res = await onlineWeb() as OnlineWebResponse;
         if (res.code === 0) {
-            const onlineUserIds = res.data
+            const onlineUserIds = res.data;
             userListWithOnlineStatus.value.forEach(user => {
-                user.isOnline = onlineUserIds.includes(user.id)
-
-            })
-            sortUserList()
+                user.isOnline = onlineUserIds.includes(user.id);
+            });
+            sortUserList();
         }
     } catch (error) {
-        console.error('获取在线用户列表失败', error)
+        console.error('获取在线用户列表失败', error);
     }
-}
+};
 
 // 处理接收到的 WebSocket 通知
 const handleWsNotify = (data: any) => {
     if (data.type === 'notify') {
-        const { type, content } = data.content
-        const userInfo = JSON.parse(content)
-        const userIndex = userListWithOnlineStatus.value.findIndex(u => u.id === userInfo.id)
+        const { type, content } = data.content;
+        const userInfo = JSON.parse(content);
+        const userIndex = userListWithOnlineStatus.value.findIndex(u => u.id === userInfo.id);
         if (userIndex !== -1) {
             if (type === 'web-online') {
-                userListWithOnlineStatus.value[userIndex].isOnline = true
+                userListWithOnlineStatus.value[userIndex].isOnline = true;
             } else if (type === 'web-offline') {
-                userListWithOnlineStatus.value[userIndex].isOnline = false
+                userListWithOnlineStatus.value[userIndex].isOnline = false;
             }
-            sortUserList()
+            sortUserList();
         }
     }
-}
+};
 
 const handleGroupClick = (item: UserMapItem) => {
     try {
@@ -147,12 +148,20 @@ onUnmounted(() => {
         display: flex;
         height: 20px;
         width: 130px;
-        padding: 15px;
+
         align-items: center;
-        justify-content: center;
-        // color: #24E68A;
         margin-bottom: 10px;
         border-bottom: #e2e1e1 1px solid;
+
+        @media screen and (max-width: 700px) {
+            padding: 15px;
+            justify-content: center;
+        }
+
+        @media screen and (min-width: 700px) {
+            margin-top: 15px;
+            margin-left: 15px;
+        }
     }
 
     .group-list-item {
