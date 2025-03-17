@@ -31,16 +31,14 @@
             <div class="main-left">
                 <ChatList></ChatList>
             </div>
-            <div class="main-center">
+            <div class="main-center" ref="mainCenterRef">
                 <!-- 修改 v-if 为 v-show -->
                 <ChatList class="mobile-chat-list"
                     :style="showChatList? 'transform: translateX(0%);' : 'transform: translateX(-100%);'" />
                 <GroupList class="mobile-group-list"
-                    :style="showGroupList? 'transform: translateX(70%);' : 'transform: translateX(200%);'" />
+                    :style="showGroupList? 'transform: translateX(140%);' : 'transform: translateX(200%);'" />
                 <Message></Message>
-                
             </div>
-            
             <div class="main-right">
                 <GroupList></GroupList>
             </div>
@@ -52,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount,watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { logout } from '@/api/login'
@@ -65,6 +63,7 @@ import ChatName from '@/components/ChatName.vue'
 import UserItem from '@/components/UserItem.vue'
 import GroupList from '@/components/GroupList.vue'
 import Avatar from '@/components/Avatar.vue'
+import { useSwipe } from '@vueuse/core'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -72,12 +71,14 @@ const showUserInfo = ref(false)
 const showSidebars = ref(true)
 const showChatList = ref(false)
 const showGroupList = ref(false)
+const mainCenterRef = ref(null)
 
 const toggleChatList = (event: MouseEvent) => {
-    event.stopPropagation() // 阻止事件冒泡
-    showChatList.value = !showChatList.value
-    console.log('toggleChatList 被触发，showChatList:', showChatList.value)
-}
+    event.stopPropagation(); // 阻止事件冒泡
+    showChatList.value = !showChatList.value;
+    showGroupList.value = false;
+    console.log('toggleChatList 被触发，showChatList:', showChatList.value);
+};
 
 const handleOutsideClick = (event: MouseEvent) => {
     const target = event.target as HTMLElement
@@ -97,9 +98,33 @@ const handleOutsideClick = (event: MouseEvent) => {
 
 const toggleGroupList = (event: MouseEvent) => {
     event.stopPropagation() // 阻止事件冒泡
-    showGroupList.value = !showGroupList.value
+    showGroupList.value = !showGroupList.value;
+    showChatList.value = false;
     console.log('toggleGroupList 被触发，showGroupList:', showGroupList.value)
 }
+
+const { direction } = useSwipe(mainCenterRef, {
+    threshold: 50, // 划动阈值
+});
+
+onMounted(() => {
+    const handleSwipe = () => {
+        if (window.innerWidth < 700) {
+            if (direction.value === 'right') {
+                toggleChatList(new MouseEvent('click'));
+            } else if (direction.value === 'left') {
+                toggleGroupList(new MouseEvent('click'));
+            }
+        }
+    };
+    // direction.value = null;
+    watch(direction, handleSwipe);
+});
+
+onBeforeUnmount(() => {
+    // 移除事件监听
+    // 这里不需要额外移除，因为 watch 会自动处理
+});
 </script>
 
 <style scoped lang="scss">
@@ -256,11 +281,13 @@ $column-layout: 1fr 3fr 1fr;
                 z-index: 110; // 确保 GroupList 在 ChatList 之上
                 opacity: 1;
                 display: block;
-                transform: translateX(100%);
-                width: 70%;
+                border-radius: 20px;
+                transform: translateX(120%);
+                width: 50%;
+                height: 100%;
                 .slide-in {
                     opacity: 0;
-                    transform: translateX(0%);
+                    transform: translateX(20%);
                 }
                 .slide-out {
                     opacity: 1;

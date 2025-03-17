@@ -2,6 +2,15 @@
     <div>
         <div class="group-list">
             <!-- 遍历排序后的用户列表 -->
+            <div class="group-list-title">
+                <svg t="1742184828584" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="5179" width="33" height="33">
+                    <path
+                        d="M748.07488 534.688c72.64-60.928 144.192-120.992 215.808-180.96 13.056-10.944 29.184-12.8 42.24-5.28 13.44 7.68 21.088 22.304 16.96 37.664-2.112 7.872-7.2 16.32-13.44 21.568a46438.4 46438.4 0 0 1-242.464 203.712c-16.64 13.92-37.6 11.936-51.68-4.64a13666.24 13666.24 0 0 1-100.288-119.552c-14.912-18.016-13.344-38.784 2.976-52.544 15.232-12.864 37.568-9.472 52.256 8l69.632 82.88c2.4 2.848 4.928 5.632 8 9.152zM142.05888 321.792a160.512 160.512 0 1 0 321.024 0 160.512 160.512 0 0 0-321.024 0zM533.80288 862.304c47.296 0 81.792-45.6 68.064-90.88-38.912-128.384-158.208-221.856-299.328-221.856-141.12 0-260.384 93.472-299.296 221.888-13.728 45.248 20.768 90.88 68.064 90.88h462.496v-0.032z"
+                        fill="#1296db" p-id="5180"></path>
+                </svg>:
+                {{ onlinePeople }}
+            </div>
             <div class="group-list-item" v-for="(item, index) in sortedUserList" :key="index"
                 @click="handleGroupClick(item)">
                 <div class="group-list-item-avatar">
@@ -32,7 +41,7 @@ import EventBus from '@/utils/eventBus'
 const userStore = useUserStore()
 const messageStore = useMessageStore()
 const chatListStore = useChatListStore()
-
+const onlinePeople = ref(0) // 在线的people
 // 存储包含用户是否在线信息的列表
 const userListWithOnlineStatus = ref<(UserMapItem & { isOnline: boolean })[]>([])
 // 存储排序后的用户列表
@@ -45,10 +54,11 @@ const sortUserList = () => {
             return -1
         }
         if (!a.isOnline && b.isOnline) {
+            onlinePeople.value++
             return 1
         }
         return 0
-    })
+    }).filter(user => user.id !== userStore.user?.userId.toString())
 }
 interface OnlineWebResponse {
     code: number;
@@ -62,6 +72,7 @@ const updateUserOnlineStatus = async () => {
             const onlineUserIds = res.data
             userListWithOnlineStatus.value.forEach(user => {
                 user.isOnline = onlineUserIds.includes(user.id)
+
             })
             sortUserList()
         }
@@ -120,10 +131,30 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    justify-content: center;
+
     @media screen and (max-width: 700px) {
+        height: 100%;
         max-height: 100%;
+        background: #fff;
+        // border:#24E68A 3px solid;
     }
+
+    @media screen and (min-width: 700px) {
+        justify-content: center;
+    }
+
+    .group-list-title {
+        display: flex;
+        height: 20px;
+        width: 130px;
+        padding: 15px;
+        align-items: center;
+        justify-content: center;
+        // color: #24E68A;
+        margin-bottom: 10px;
+        border-bottom: #e2e1e1 1px solid;
+    }
+
     .group-list-item {
         display: flex;
         width: 100%;
@@ -168,7 +199,8 @@ onUnmounted(() => {
                 border-radius: 50%;
             }
         }
-        .group-list-item-name{
+
+        .group-list-item-name {
             margin-left: 10px;
         }
     }

@@ -350,45 +350,32 @@ onBeforeUnmount(() => {
         align-items: center;
         justify-content: center;
     }
-
-
-
-
-
-
     /* 自定义滚动条样式 */
     &::-webkit-scrollbar {
         width: 6px;
     }
-
-
-
-
-
     &::-webkit-scrollbar-thumb {
         background-color: #dcdfe6;
         border-radius: 3px;
     }
-
-
-
     &::-webkit-scrollbar-track {
         background-color: transparent;
     }
     .logout{
         display: none;
         @media screen and (max-width: 700px) {
-            bottom: 80px;
+            bottom: 60px;
             width: 100%;
             height: 50px;
             position: absolute;
             display: flex;
+            background: #f6f6f7;
             align-items: center;
             justify-content: center;
             margin-top: 10px;
             margin-bottom: 10px;
             border-top: 1px solid #e0e0e0;
-            border-radius: 5px;
+            // border-radius: 15px;
             cursor: pointer;
             span{
                 padding-left: 20px;

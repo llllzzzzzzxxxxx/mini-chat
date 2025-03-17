@@ -47,6 +47,62 @@
             </div>
         </div>
     </div>
+    <div class="MobileLoginPage">
+        <div class="MobileLoginPage">
+            <div class="box" v-if="isLogin">
+                <form>
+                    <h2>Sign in</h2>
+                    <div class="inputBox">
+                        <input type="text" v-model="loginForm.userName" required>
+                        <span>UserName</span>
+                        <i></i>
+                    </div>
+                    <div class="inputBox">
+                        <input type="text" v-model="loginForm.password" required>
+                        <span>Password</span>
+                        <i></i>
+                    </div>
+                    <div class="links">
+                        <a href="#">Forgot Password ?</a>
+                        <a href="#" @click="handleSwitch">{{ isLogin ? 'Register' : 'Login' }}</a>
+                    </div>
+                    <span @click="handleLogin" class="btn">
+                        <span>Login</span>
+                    </span>
+                </form>
+            </div>
+            <div class="box " style="height: 500px;" v-if="!isLogin">
+                <form autocomplete="off">
+                    <h2>Register</h2>
+                    <div class="inputBox">
+                        <input type="text" v-model="registerForm.email" required>
+                        <span>UserName</span>
+                        <i></i>
+                    </div>
+                    <div class="inputBox">
+                        <input type="text" v-model="registerForm.userName" required>
+                        <span>Password</span>
+                        <i></i>
+                    </div>
+                    <div class="inputBox">
+                        <input type="text" v-model="registerForm.password" required>
+                        <span>code</span>
+                        <button type="button" class="getCode" :disabled="countdown > 0" @click="sendVerifyCode">
+                            {{ countdown > 0 ? `${countdown}s` : '获取验证码' }}
+                        </button>
+                        <i></i>
+                    </div>
+                    <div class="links">
+                        <a href="#"></a>
+                        <a href="#" @click="handleSwitch">{{ isLogin ? 'Register' : 'Login' }}</a>
+                    </div>
+                    <span @click="handleRegister" class="btn">
+                        <span>Register</span>
+                    </span>
+                </form>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -56,7 +112,7 @@ import { login, register, getCode } from '@/api/login'
 import { ElMessage } from 'element-plus'
 import type { LoginResponse, RegisterResponese, CodeResponese, UserInfo } from '@/types/login'
 import { useUserStore } from '@/stores/module/useUserStore'
-
+import MobileLogin from '@/components/MobileLogin.vue'
 const router = useRouter()
 const isLogin = ref(true)
 const isAnimating = ref(false)
@@ -231,7 +287,29 @@ onMounted(() => {
     // background-image: linear-gradient(90deg, #e0c3fc, #8ec5fc 100%);
     background-size: cover;
     background-position: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-repeat: no-repeat;
+
+    .MobileLogin {
+        display: none;
+    }
+
+    @media screen and (max-width: 700px) {
+        .MobileLogin {
+            display: flex;
+
+        }
+    }
+
+    @media screen and (min-width: 700px) {
+        // position: absolute;
+        // top: 0%;
+        // left: 0%;
+
+    }
 }
 
 body {
@@ -259,30 +337,45 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
 }
 
 @media (max-width: 1200px) {
+
     .shell {
         transform: scale(0.7);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 }
 
 @media (max-width: 1000px) {
     .shell {
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        transform: translate(-50%, -50%);
         transform: scale(0.6);
     }
 }
 
 @media (max-width: 800px) {
     .shell {
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        transform: translate(-50%, -50%);
         transform: scale(0.5);
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .shell {
-        transform: scale(0.4);
+        display: none;
     }
+
 }
 
 .container {
@@ -536,5 +629,231 @@ body {
 .send-code-btn:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+.MobileLoginPage {
+    display: flex;
+
+    @media screen and (min-width: 700px) {
+        display: none;
+    }
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        flex-direction: column;
+        background: #fefeff;
+    }
+
+    .box {
+        position: relative;
+        width: 380px;
+        height: 420px;
+        background: #e9e9e9;
+        border-radius: 8px;
+        overflow: hidden;
+
+        .submit {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn {
+            position: absolute;
+            height: 50px;
+            width: 80px;
+            display: flex;
+            background: #0090F0;
+            border: #ffffff 1px solid;
+            border-radius: 10px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            bottom: 0%;
+            z-index: 20;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            :hover {
+                cursor: pointer;
+            }
+        }
+    }
+
+    .box::before {
+        content: '';
+        z-index: 1;
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 380px;
+        height: 420px;
+        transform-origin: bottom right;
+        background: linear-gradient(0deg, transparent, #45f3ff, #45f3ff);
+        animation: animate 6s linear infinite;
+    }
+
+    .box::after {
+        content: '';
+        z-index: 1;
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 380px;
+        height: 420px;
+        transform-origin: bottom right;
+        background: linear-gradient(0deg, transparent, #45f3ff, #45f3ff);
+        animation: animate 6s linear infinite;
+        animation-delay: -3s;
+    }
+
+    @keyframes animate {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    form {
+        position: absolute;
+        inset: 2px;
+        background: #ECF0F3;
+        color: #ffffff;
+        //阴影
+        box-shadow: 2px 10px 5px rgba(255, 255, 255, 0.2); // 添加阴影效果
+        padding: 50px 40px;
+        border-radius: 8px;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+    }
+
+    h2 {
+        color: #0090F0;
+        font-weight: 500;
+        text-align: center;
+        letter-spacing: 0.1em;
+    }
+
+    .inputBox {
+        position: relative;
+        width: 300px;
+        margin-top: 35px;
+
+        .getCode {
+            position: absolute;
+            color: #ffffff;
+            left: 0;
+            top: 55px;
+            background: #0090F0;
+            z-index: 1000;
+            border-radius: 10px;
+            height: 30px;
+            width: 100px;
+        }
+    }
+
+    .inputBox input {
+        position: relative;
+        width: 100%;
+        padding: 20px 10px 10px;
+        background: transparent;
+        outline: none;
+        box-shadow: none;
+        border: none;
+        color: #f1efef;
+        font-size: 1em;
+        letter-spacing: 0.05em;
+        transition: 0.5s;
+        z-index: 10;
+    }
+
+    .inputBox span {
+        position: absolute;
+        left: 0;
+        padding: 20px 0px 10px;
+        pointer-events: none;
+        font-size: 1em;
+        color: #8f8f8f;
+        letter-spacing: 0.05em;
+        transition: 0.5s;
+    }
+
+    .inputBox input:valid~span,
+    .inputBox input:focus~span {
+        color: #0090F0;
+        transform: translateX(0px) translateY(-34px);
+        font-size: 0.75em;
+    }
+
+    .inputBox i {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background: #0090F0;
+        border-radius: 4px;
+        overflow: hidden;
+        transition: 0.5s;
+        pointer-events: none;
+        z-index: 9;
+    }
+
+    .inputBox input:valid~i,
+    .inputBox input:focus~i {
+        height: 44px;
+    }
+
+    .links {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .links a {
+        margin: 10px 0;
+        font-size: 0.75em;
+        color: #8f8f8f;
+        text-decoration: beige;
+    }
+
+    .links a:hover,
+    .links a:nth-child(2) {
+        color: #0090F0;
+    }
+
+    input[type="submit"] {
+        border: none;
+        outline: none;
+        padding: 11px 25px;
+        background: #0090F0;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: 600;
+        width: 100px;
+        margin-top: 10px;
+        margin-left: 100px;
+    }
+
+    input[type="submit"]:active {
+        opacity: 0.8;
+    }
 }
 </style>

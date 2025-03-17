@@ -272,12 +272,13 @@ onBeforeUnmount(() => {
     box-sizing: border-box;
     position: relative;
 }
-
 .message-list {
     padding: 20px;
     overflow-y: auto;
     height: calc(100vh - 300px);
-
+    @media screen and (max-width: 700px) {
+        padding: 15px;
+    }
     &::-webkit-scrollbar {
         width: 6px;
     }
