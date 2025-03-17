@@ -1,33 +1,14 @@
 # mini-chat
+## 项目介绍
+mini-chat是一款基于 Vite 5 和 Vue 3 构建的高性能即时通讯在线聊天系统。系统以轻量化设计为核心，具备快速部署和便捷扩展的特点，适用于企业内部协作、团队沟通以及小型社交平台等多种场景。
+## 相关环境
+node版本：18.12.1
+pnpm版本：9.9.0
+## 技术栈
 
-This template should help get you started developing with Vue 3 in Vite.
+- Vite 5：一款现代化的前端构建工具，具有超快的热更新速度和极致的构建性能，提供了极佳的开发体验和优化后的生产构建，使前端开发更加高效便捷。
 
-## Recommended IDE Setup
+- Vue 3：一种渐进式JavaScript框架，采用响应式数据绑定和组件化开发模式，提供简洁的API和强大的功能，帮助开发者构建高性能、可维护的用户界面。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-pnpm dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-pnpm build
-```
+- WebSocket：一种全双工通信协议，专为实时通信应用设计，能够在客户端和服务器之间保持长连接，支持即时消息的实时推送和低延迟传输，确保系统能够快速响应用户操作。
+## 项目效果
