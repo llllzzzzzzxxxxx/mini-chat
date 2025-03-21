@@ -84,7 +84,8 @@ const initRTCPeerConnection = () => {
                 username: 'webrtc@live.com',
                 credential: 'muazkh'
             }
-        ]
+        ],
+        googCongestionControl: 'cubic'
     }
     pc.value = new RTCPeerConnection(iceServer)
     dataChannel.value = pc.value.createDataChannel('fileTransfer')
