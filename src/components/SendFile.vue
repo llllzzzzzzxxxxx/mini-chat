@@ -230,6 +230,9 @@ onBeforeMount(() => {
     EventBus.off("on-receive-file", handleFileMsg)
 })
 
+
+
+
 </script>
 
 <style scoped lang="scss">
