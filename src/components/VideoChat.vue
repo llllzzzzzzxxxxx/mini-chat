@@ -437,6 +437,7 @@ onUnmounted(async () => {
     EventBus.off('on-receive-video', handlerVideoMsg)
 })
 
+
 </script>
 
 <style scoped lang="scss">
