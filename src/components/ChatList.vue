@@ -174,7 +174,7 @@ const handleChatClick = (chat: ChatListItem) => {
 // 获取最新消息内容
 const getLatestMessage = (targetId: string): string => {
     const chat = chatListStore.chatList.find(item => item.targetId === targetId)
-    if (!chat?.lastMessage.message) return '暂无消息'
+    if (!chat?.lastMessage||!chat?.lastMessage.message) return '暂无消息'
     if (chat.lastMessage.type === 'call') {
         if (chat.lastMessage.message === '0') return '[未接通]';
         else return '[语音通话]';
