@@ -13,6 +13,7 @@ export const useUserStore = defineStore('user', {
         token: '',
         chatList: [] as any[],
         userMap: {} as UserMap,
+        showUserInfo: false,
     }),
     actions: {
         setUser(user: UserInfo) {

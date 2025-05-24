@@ -6,17 +6,21 @@
                     <img :src="defaultAvatar" />
                 </el-avatar>
                 <el-upload class="avatar-uploader" action="/api/v1/user/upload" :show-file-list="false"
-                    :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload" :headers="uploadHeaders">
-                    <el-button type="primary" size="small">更换头像</el-button>
+                    :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload" :headers="uploadHeaders"
+                    :http-request="handleCustomRequest">
+                    <div 
+                        class="drag-area"
+                    >
+                        <div class="upload-tip">
+                            点击上传
+                        </div>
+                    </div>
                 </el-upload>
             </div>
             <div class="info-form">
                 <el-form :model="userInfo" label-width="80px">
                     <el-form-item label="用户名">
                         <el-input v-model="userInfo.userName" placeholder="请输入用户名" />
-                    </el-form-item>
-                    <el-form-item label="邮箱">
-                        <el-input v-model="userInfo.email" disabled />
                     </el-form-item>
                 </el-form>
             </div>
@@ -32,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { upload } from '@/api/file'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/module/useUserStore'
 import { update } from '@/api/user'
@@ -63,6 +68,40 @@ const userInfo = ref<UserInfo>({
     avatar: userStore.user?.avatar || null,
     type: userStore.user?.type || ''
 })
+
+// 拖拽状态
+// 删除拖拽状态声明
+// const isDragging = ref(false)
+
+// 删除拖拽处理方法
+// const handleDragover = () => {
+//     isDragging.value = true
+// }
+// const handleDragleave = () => {
+//     isDragging.value = false
+// }
+// const handleDrop = (e: DragEvent) => {
+//     isDragging.value = false
+//     const files = e.dataTransfer?.files
+//     if (files && files[0]) {
+//         handleCustomRequest({ file: files[0] })
+//     }
+// }
+
+// 自定义上传方法
+const handleCustomRequest = async (options: any) => {
+    try {
+        const formData = new FormData()
+        formData.append('file', options.file)
+        const res = await upload(formData)
+        if (res.code === 0) {
+            userInfo.value.avatar = res.data
+            ElMessage.success('头像上传成功')
+        }
+    } catch (error) {
+        ElMessage.error('上传失败')
+    }
+}
 
 // 上传请求头
 const uploadHeaders = computed(() => ({
@@ -99,10 +138,9 @@ const handleSave = async () => {
         ElMessage.error('请输入用户名')
         return
     }
-
     try {
         const res = await update({
-            userName: userInfo.value.userName,
+            name: userInfo.value.userName,
             avatar: userInfo.value.avatar
         })
 
@@ -132,6 +170,29 @@ const handleSave = async () => {
 
         .avatar-uploader {
             margin-top: 10px;
+            width: 100px;
+            height: 100px;
+            .drag-area {
+                width: 100%;
+                height: 100%;
+                border: 2px dashed var(--el-color-primary);
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(64, 158, 255, 0.1);
+                cursor: pointer;
+                // 移除hover状态样式
+                // &:hover {
+                //     border-color: var(--el-color-primary-light-3);
+                // }
+                .upload-tip {
+                    text-align: center;
+                    font-size: 12px;
+                    color: var(--el-text-color-regular);
+                    padding: 8px;
+                }
+            }
         }
     }
 

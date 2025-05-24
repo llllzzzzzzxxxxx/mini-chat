@@ -1,7 +1,7 @@
 <template>
-    <div class="main-right-header" @click="showUserInfo = true">
+    <div class="main-right-header" @click="userStore.showUserInfo = true">
         <div v-if="userStore.user?.avatar" class="main-right-header-left">
-            <img :src="userStore.user?.avatar" alt="">
+            <img :src="userStore.user?.avatar" class="avatar" alt="">
         </div>
         <div v-else class="main-right-header-left">
             <Avatar :name="userStore.user?.userName || ''" :size="40" />
@@ -27,7 +27,6 @@ import { ref } from 'vue'
 import Avatar from './Avatar.vue'
 const userStore = useUserStore()
 
-const showUserInfo = ref(false)
 const handleLogout = () => {
     userStore.logout()
 }
@@ -43,6 +42,12 @@ const handleLogout = () => {
 
     .main-right-header-left {
         flex: 1;
+        .avatar{
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px
+        }
     }
 
     .main-right-header-right {

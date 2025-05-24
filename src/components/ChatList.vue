@@ -6,7 +6,7 @@
             <div v-for="chat in chatListStore.groupChats" :key="chat.id" class="chat-item"
                 :class="{ active: messageStore.targetId === chat.targetId }" @click="handleChatClick(chat)">
                 <div class="chat-avatar">
-                    <img v-if="chat.targetInfo.avatar" :src="chat.targetInfo.avatar" alt="">
+                    <img v-if="userStore.userMap[chat.targetId]?.avatar" :src="userStore.userMap[chat.targetId]?.avatar" class="avatar" alt="">
                     <Avatar v-else :name="chat.targetInfo.name" :size="40" />
                     <div v-if="chat.unreadCount > 0" class="unread-badge">
                         {{ chat.unreadCount > 99 ? '99+' : chat.unreadCount }}
@@ -33,7 +33,7 @@
             <div v-for="chat in chatListStore.privateChats" :key="chat.id" class="chat-item"
                 :class="{ active: messageStore.targetId === chat.targetId }" @click="handleChatClick(chat)">
                 <div class="chat-avatar">
-                    <img v-if="chat.targetInfo.avatar" :src="chat.targetInfo.avatar" alt="">
+                    <img v-if="userStore.userMap[chat.targetId]?.avatar" :src="userStore.userMap[chat.targetId]?.avatar" alt="">
                     <Avatar v-else :name="chat.targetInfo.name" :size="40" />
                     <div v-if="chat.unreadCount > 0" class="unread-badge">
                         {{ chat.unreadCount > 99 ? '99+' : chat.unreadCount }}
@@ -275,6 +275,9 @@ onBeforeUnmount(() => {
 
             img {
                 width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
             }
 
             .unread-badge {

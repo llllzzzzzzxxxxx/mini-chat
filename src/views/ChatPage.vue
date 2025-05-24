@@ -45,7 +45,7 @@
         </div>
 
         <!-- 用户信息编辑弹窗 -->
-        <UserInfo v-model="showUserInfo" />
+        <UserInfo v-model="userStore.showUserInfo" />
     </div>
 </template>
 

@@ -12,4 +12,4 @@ export const invite = (param: any) => Http.post('/api/v1/file/invite', param);
 
 export const accept = (param: any) => Http.post('/api/v1/file/accept', param);
 
-export const upload = (param: any) => Http.post('/api/v1/common/upload', param);
+export const upload = (param: any) => Http.post('/api/v1/common/uploadImage', param);

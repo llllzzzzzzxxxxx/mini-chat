@@ -14,7 +14,7 @@
             <div class="group-list-item" v-for="(item, index) in sortedUserList" :key="index"
                 @click="handleGroupClick(item)">
                 <div class="group-list-item-avatar">
-                    <img v-if="item.avatar" :src="item.avatar" alt="">
+                    <img v-if="item.avatar" :src="item.avatar"  alt="">
                     <Avatar v-else :name="item.name" :size="31" />
                     <!-- 在线状态小绿原点 -->
                     <div v-if="item.isOnline" class="online-dot"></div>
@@ -206,6 +206,12 @@ onUnmounted(() => {
                 height: 10px;
                 background-color: #24E68A;
                 border-radius: 50%;
+            }
+            img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
             }
         }
 

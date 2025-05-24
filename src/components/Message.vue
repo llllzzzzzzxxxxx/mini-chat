@@ -11,8 +11,9 @@
                 </div>
                 <!-- 消息内容 -->
                 <div class="message-content" :class="{ 'message-self': isSelf(message.fromId) }">
-                    <div class="message-avatar">
-                        <Avatar :name="message.fromInfo.name" :size="40" />
+                    <div class="message-avatar" >
+                        <img v-if="userStore.userMap[message.fromId]?.avatar" :src="userStore.userMap[message.fromId]?.avatar" alt="avatar" class="avatar">
+                        <Avatar v-else :name="message.fromInfo.name" :size="40" />
                     </div>
                     <div class="message-body">
                         <div class="message-name">{{ message.fromInfo.name }}</div>
@@ -338,7 +339,7 @@ onBeforeUnmount(() => {
 
         .message-body {
             margin-right: 12px;
-            margin-left: 0;
+            margin-left: 12px;
             align-items: flex-end;
 
             .message-name {
@@ -354,7 +355,13 @@ onBeforeUnmount(() => {
 }
 
 .message-avatar {
-    margin-right: 12px;
+    // margin-right: 12px;
+    img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 }
 
 .message-body {
