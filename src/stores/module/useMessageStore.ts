@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { MessageRecord, SendMessageParams } from '@/types/message'
-import { send } from '@/api/message'
+import { recall, send } from '@/api/message'
 export const useMessageStore = defineStore('message', () => {
     const targetId = ref('')
     const messages = ref<MessageRecord[]>([])
@@ -93,6 +93,23 @@ export const useMessageStore = defineStore('message', () => {
         return ''
     }
 
+    function removeMessage(msgId: string) {
+        messages.value = messages.value.filter(msg => msg.id !== msgId)
+    }
+
+    async function recallMessage(msgId: string) {
+        try {
+            const res = await recall({ msgId })
+            if (res.code === 0) {
+                removeMessage(msgId)
+                return true
+            }
+            return false
+        } catch (error) {
+            return false
+        }
+    }
+
     return {
         targetId,
         messages,
@@ -110,5 +127,7 @@ export const useMessageStore = defineStore('message', () => {
         clearMessages,
         getMessageText,
         sendMessage,
+        removeMessage,
+        recallMessage
     }
 })

@@ -10,12 +10,12 @@
                     {{ formatTime(message.createTime) }}
                 </div>
                 <!-- 消息内容 -->
-                <div class="message-content" :class="{ 'message-self': isSelf(message.fromId) }">
+                <div v-if="message.type === 'text' || message.type === 'emoji' || message.type === 'call'" class="message-content" :class="{ 'message-self': isSelf(message.fromId) }">
                     <div class="message-avatar" >
                         <img v-if="userStore.userMap[message.fromId]?.avatar" :src="userStore.userMap[message.fromId]?.avatar" alt="avatar" class="avatar">
                         <Avatar v-else :name="message.fromInfo.name" :size="40" />
                     </div>
-                    <div class="message-body">
+                    <div class="message-body" @contextmenu.prevent="showContextMenu($event, message)">
                         <div class="message-name">{{ message.fromInfo.name }}</div>
                         <div class="message-text" v-if="message.type === 'text'">
                             <template v-if="Array.isArray(message.message)">
@@ -50,7 +50,13 @@
                         </div>
                     </div>
                 </div>
+                <div v-else-if="message.type === 'recall'" class="message-recall">
+                    {{ message.fromInfo.name }}撤回了一条消息
+                </div>
             </div>
+        </div>
+        <div v-if="showMenu" class="context-menu" :style="menuStyle">
+            <div v-if="canRecall" class="menu-item" @click="handleRecall">撤回</div>
         </div>
         <InputField />
     </div>
@@ -261,6 +267,58 @@ onBeforeUnmount(() => {
     // 移除事件监听
     EventBus.off('on-receive-msg', handleNewMessage)
 })
+const showMenu = ref(false)
+const menuStyle = ref({
+    top: '0px',
+    left: '0px'
+})
+const selectedMessage = ref<MessageRecord | null>(null)
+const canRecall = ref(false)
+
+// 显示右键菜单
+const showContextMenu = (event: MouseEvent, message: MessageRecord) => {
+    // 只能撤回自己的消息且在2分钟内
+    const canRecallMessage = isSelf(message.fromId) && 
+        (Date.now() - new Date(message.createTime).getTime() <= 2 * 60 * 1000)
+
+    if (!canRecallMessage) return
+
+    event.preventDefault()
+    showMenu.value = true
+    canRecall.value = true
+    selectedMessage.value = message
+    menuStyle.value = {
+        top: `${event.clientY}px`,
+        left: `${event.clientX}px`
+    }
+}
+
+// 处理撤回消息
+const handleRecall = async () => {
+    if (!selectedMessage.value) return
+    const success = await messageStore.recallMessage(selectedMessage.value.id)
+    if (success) {
+        ElMessage.success('消息已撤回')
+    } else {
+        ElMessage.error('撤回失败')
+    }
+    showMenu.value = false
+}
+
+// 点击其他地方关闭菜单
+const closeMenu = () => {
+    showMenu.value = false
+    selectedMessage.value = null
+    canRecall.value = false
+}
+
+onMounted(() => {
+    document.addEventListener('click', closeMenu)
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', closeMenu)
+})
 </script>
 
 <style scoped lang="scss">
@@ -397,6 +455,32 @@ onBeforeUnmount(() => {
         max-height: 200px;
         border-radius: 4px;
     }
+}
+.context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 4px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+
+    .menu-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+
+        &:hover {
+            background-color: #f5f5f5;
+        }
+    }
+}
+.message-recall {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin: 10px 0;
 }
 @media (max-width: 700px){
     .message-list{
